@@ -19,9 +19,8 @@ jobs:
 
       - name: Download hos-sdk & load env
         run: |
-          wget -O hos-sdk.zip https://github.com/harmonyos-dev/hos-sdk/releases/latest/download/hos-sdk-linux.zip
+          wget -O hos-sdk.zip https://github.com/harmonyos-dev/hos-sdk/releases/latest/download/hos-sdk.zip
           unzip -q hos-sdk.zip -d ./hos-sdk
-          # 加载官方环境脚本，自动注入 ohpm、hvigor 到 PATH
           source ./hos-sdk/env.sh
           echo "HOS_SDK_HOME=$PWD/hos-sdk" >> $GITHUB_ENV
           echo "$PWD/hos-sdk/bin" >> $GITHUB_PATH
