@@ -1,107 +1,51 @@
-name: HarmonyOS NEXT (HAP)
-
-# 鸿蒙端 ArkTS 原生工程出 HAP。
-# SDK 获取 / 环境配置参考公开仓库：https://github.com/harmonyos-dev/hos-sdk
-# 流程：从 hos-sdk latest release 下载 Linux 命令行工具 -> sdkmgr 安装 toolchains
-#       -> 配置 HOS_SDK_HOME -> ohpm 安装依赖 -> hvigor assembleHap。
-# 注意：hos-sdk 提供的是 OpenHarmony toolchains；与纯血 HarmonyOS NEXT 商业 SDK 的
-#       兼容性需在首次跑通后核对。API Level 13（5.0.1(13)）。
+name: HarmonyOS NEXT Build (HoKit Unsigned HAP)
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags: [ 'v*' ]
-  pull_request:
   workflow_dispatch:
 
-env:
-  HOS_DIR: harmonyos
-  HOS_SDK_REPO: harmonyos-dev/hos-sdk
-
 jobs:
-  build:
+  build-hos:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup JDK 17
+      - name: Setup JDK17
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          java-version: 17
+          distribution: 'temurin'
 
-      - name: Setup Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
-      - name: Fetch hos-sdk Linux commandline-tools asset
-        id: asset
+      - name: Download hos-sdk & load env
         run: |
-          RELEASE_JSON=$(curl -s -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ env.HOS_SDK_REPO }}/releases/latest")
-          ASSET_URL=$(echo "$RELEASE_JSON" | jq -r \
-            '.assets[] | select(.name | test("commandline-tools-linux")) | .browser_download_url' | head -n1)
-          if [ -z "$ASSET_URL" ]; then echo "未找到 Linux 命令行工具资产" && exit 1; fi
-          echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
-          echo "Asset: $ASSET_URL"
-          curl -LJO "$ASSET_URL"
-          unzip -q commandline-tools-linux-*.zip -d ./cli
+          wget -O hos-sdk.zip https://github.com/harmonyos-dev/hos-sdk/releases/latest/download/hos-sdk-linux.zip
+          unzip -q hos-sdk.zip -d ./hos-sdk
+          # 加载官方环境脚本，自动注入 ohpm、hvigor 到 PATH
+          source ./hos-sdk/env.sh
+          echo "HOS_SDK_HOME=$PWD/hos-sdk" >> $GITHUB_ENV
+          echo "$PWD/hos-sdk/bin" >> $GITHUB_PATH
 
-      - name: Install HarmonyOS SDK toolchains
+      - name: Ohpm install dependencies
         run: |
-          export JAVA_TOOL_OPTIONS="$JAVA_TOOL_OPTIONS -Duser.country=CN"
-          chmod +x ./cli/command-line-tools/sdkmanager/bin/sdkmgr || true
-          ./cli/command-line-tools/sdkmanager/bin/sdkmgr install \
-            toolchains:9 OpenHarmony/toolchains:9 --accept-license || true
-          mkdir -p ./hwsdk
-          echo "HOS_SDK_HOME=$PWD/hwsdk" >> "$GITHUB_ENV"
-          echo "PATH=$PWD/cli/command-line-tools/tools/ohpm/bin:$PWD/cli/command-line-tools/tools/hvigor/bin:$PATH" >> "$GITHUB_ENV"
+          source ./hos-sdk/env.sh
+          cd harmonyos
+          ohpm install --all
 
-      - name: ohpm install dependencies
-        working-directory: ${{ env.HOS_DIR }}
-        run: ohpm install --all
-
-      - name: Install hvigor wrapper
-        working-directory: ${{ env.HOS_DIR }}
+      - name: Build unsigned HAP (HoKit)
         run: |
-          npm init -y >/dev/null 2>&1 || true
-          npm i -D @ohos/hvigor@5.0.0
+          source ./hos-sdk/env.sh
+          cd harmonyos
+          hvigorw assembleHap --buildMode=release --no-daemon
 
-      - name: Build HAP
-        working-directory: ${{ env.HOS_DIR }}
+      - name: Find HAP
+        id: findhap
         run: |
-          npx hvigor --mode module -p product=default assembleHap \
-            --no-daemon --accept-license
-
-      - name: Locate HAP
-        id: find_hap
-        working-directory: ${{ env.HOS_DIR }}
-        run: |
-          HAP=$(find entry/build -name "*.hap" | head -n1)
-          echo "hap_path=$HAP" >> "$GITHUB_OUTPUT"
-          echo "HAP: $HAP"
+          HAP=$(find harmonyos/build -name "*-unsigned.hap" | head -n1)
+          echo "hap=$HAP" >> $GITHUB_OUTPUT
 
       - name: Upload HAP
         uses: actions/upload-artifact@v4
         with:
-          name: qinglong-client-harmonyos-hap
-          path: ${{ env.HOS_DIR }}/${{ steps.find_hap.outputs.hap_path }}
-
-      # ===== 可选：签名发布包（需在 Secrets 配置调试/发布证书与 Profile 后启用） =====
-      # - name: Sign HAP
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   env:
-      #     SIGN_FILE: ${{ secrets.HOS_SIGN_FILE }}
-      #     SIGN_PASSWORD: ${{ secrets.HOS_SIGN_PASSWORD }}
-      #     PROFILE: ${{ secrets.HOS_PROFILE }}
-      #   run: |
-      #     hvigorw signHap --hap-path "${{ steps.find_hap.outputs.hap_path }}" \
-      #       --sign-file "$SIGN_FILE" --password "$SIGN_PASSWORD" --profile "$PROFILE"
-
-      - name: Attach to Release (tag)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.HOS_DIR }}/${{ steps.find_hap.outputs.hap_path }}
-          generate_release_notes: true
+          name: qinglong-client-hokit-hap
+          path: ${{ steps.findhap.outputs.hap }}
