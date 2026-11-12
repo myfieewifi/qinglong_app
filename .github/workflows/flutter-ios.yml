@@ -11,23 +11,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 同 Android：pubspec 锁定 Dart <3.0.0，Flutter 必须留在 3.7.12（Dart 2.19.6），
+      # 用 3.24.0（Dart 3.5）会在 flutter pub get 阶段直接失败。
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.7.12'
           cache: true
 
-      - name: Pub get + Pod install
+      # Flutter 3.7 的构建脚本不兼容 Xcode 15+ 引入的 DT_TOOLCHAIN_DIR，
+      # 典型报错是 "DT_TOOLCHAIN_DIR cannot be used to evaluate LD_RUNPATH_SEARCH_PATHS"。
+      # 镜像里有 Xcode 14 就强制选它；没有则给出明确告警而不是一堆莫名其妙的编译错误。
+      # 想彻底摆脱这个限制，需要把工程升级到 Dart 3 + 新版 Flutter（涉及老依赖升级）。
+      - name: Select Xcode 14 if available
         run: |
-          cd flutter
-          flutter pub get
-          cd ios
-          pod install --repo-update
+          if ls -d /Applications/Xcode_14*.app >/dev/null 2>&1; then
+            XCODE=$(ls -d /Applications/Xcode_14*.app | sort -V | tail -n1)
+            echo "使用 $XCODE"
+            sudo xcode-select -s "$XCODE"
+          else
+            echo "::warning::当前 macOS 镜像只提供 Xcode 15+，Flutter 3.7.12 很可能编译失败；需升级工程到 Dart 3 + 新版 Flutter"
+          fi
+          xcodebuild -version
 
+      - name: Flutter pub get
+        working-directory: flutter
+        run: flutter pub get
+
+      # 不用手动 pod install --repo-update：flutter build ipa 会按需执行 pod install，
+      # --repo-update 每次全量更新 CocoaPods specs 仓库，白白多花好几分钟。
       - name: Build unsigned IPA (TrollStore --no-codesign)
-        run: |
-          cd flutter
-          flutter build ipa --release --no-codesign --build-name=1.0.0 --build-number=1
+        working-directory: flutter
+        run: flutter build ipa --release --no-codesign --build-name=1.0.0 --build-number=1
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4

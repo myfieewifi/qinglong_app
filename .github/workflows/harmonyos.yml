@@ -8,7 +8,12 @@ on:
 jobs:
   build-hos:
     runs-on: ubuntu-latest
-    continue-on-error: true  # ✅ 核心：鸿蒙失败，不阻塞整个流水线
+    # 仓库里没有 hvigorw / hvigorw.js（harmonyos/ 下只有 hvigorfile.ts 和 hvigor/），
+    # 原 workflow 每次都会走到 else 分支 exit 1。这里直接跳过，不再每次 push 挂红叉。
+    # 另外 HAP 构建依赖 DevEco Studio 的 HarmonyOS SDK，GitHub 托管 runner 上没有；
+    # 真要出 HAP，需要补 hvigorw 包装脚本 + 自带 SDK 的 self-hosted runner。
+    if: ${{ hashFiles('harmonyos/hvigorw', 'harmonyos/hvigorw.js') != '' }}
+    continue-on-error: true  # 鸿蒙失败不影响其它平台的构建结论
     steps:
       - uses: actions/checkout@v4
 
@@ -30,21 +35,20 @@ jobs:
             chmod +x ./hvigorw
             ./hvigorw ohpm install --all
             ./hvigorw assembleHap --buildMode=release --no-daemon
-          elif [ -f "./hvigorw.js" ]; then
+          else
             node ./hvigorw.js ohpm install --all
             node ./hvigorw.js assembleHap --buildMode=release --no-daemon
-          else
-            echo "❌ 本仓库没有找到 hvigorw / hvigorw.js，跳过鸿蒙编译"
-            exit 1
           fi
 
       - name: Find HAP
         id: findhap
         run: |
-          HAP=$(find harmonyos/build -name "*-unsigned.hap" | head -n1)
+          # 产物在 entry 模块的 build 目录下，不是 harmonyos/build
+          HAP=$(find harmonyos/entry/build harmonyos/build -name "*-unsigned.hap" 2>/dev/null | head -n1)
           if [ -n "$HAP" ]; then
             echo "hap=$HAP" >> $GITHUB_OUTPUT
           else
+            echo "未找到 unsigned HAP 产物"
             exit 1
           fi
 

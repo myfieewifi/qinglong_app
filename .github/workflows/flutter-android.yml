@@ -11,10 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 本工程是 Flutter 3.3 时代的老项目：pubspec.yaml 与 pubspec.lock 都锁定
+      # Dart ">=2.18.0 <3.0.0"。Flutter >= 3.10 自带 Dart 3，pub get 会直接
+      # version solving failed。3.7.12 是最后一个 Dart 2.19 稳定版，
+      # 与工程里的 AGP 4.1.0 / Gradle 6.7 / Kotlin 1.6.10 / JDK 11 是同一套年代的组合。
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.7.12'
           cache: true
 
       - name: Setup JDK 11
@@ -23,15 +27,33 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Flutter pub get
+      # app/build.gradle 中 release 和 debug 都引用 app/qinglong.keystore，
+      # 但该文件不在仓库里，不补上则 release 必报 Keystore file not found。
+      # 配了 KEYSTORE_BASE64 secret 就用正式签名；没配就生成一个仅供 CI 出包的
+      # 临时签名（与官方签名不同，覆盖安装前需先卸载旧版）。
+      - name: Prepare signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          cd flutter
-          flutter pub get
+          KEYSTORE=flutter/android/app/qinglong.keystore
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE"
+            echo "使用 KEYSTORE_BASE64 中的正式签名"
+          else
+            echo "未配置 KEYSTORE_BASE64，生成 CI 临时签名"
+            keytool -genkeypair -v -keystore "$KEYSTORE" \
+              -alias jiangyuesong -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass jiangyuesong -keypass jiangyuesong \
+              -dname "CN=qinglong CI, OU=CI, O=qinglong, L=CN, ST=CN, C=CN"
+          fi
+
+      - name: Flutter pub get
+        working-directory: flutter
+        run: flutter pub get
 
       - name: Build Android Release APK
-        run: |
-          cd flutter
-          flutter build apk --release --build-name=1.0.0 --build-number=1
+        working-directory: flutter
+        run: flutter build apk --release --build-name=1.0.0 --build-number=1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
