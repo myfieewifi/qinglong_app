@@ -24,7 +24,7 @@ jobs:
           cd ios
           pod install --repo-update
 
-      - name: Build unsigned IPA (TrollStore, --no-codesign)
+      - name: Build unsigned IPA (TrollStore --no-codesign)
         run: |
           cd flutter
           flutter build ipa --release --no-codesign --build-name=1.0.0 --build-number=1

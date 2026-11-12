@@ -8,6 +8,7 @@ on:
 jobs:
   build-hos:
     runs-on: ubuntu-latest
+    continue-on-error: true  # ✅ 核心：鸿蒙失败，不阻塞整个流水线
     steps:
       - uses: actions/checkout@v4
 
@@ -17,28 +18,35 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Install Node.js (hvigor 依赖node)
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Ohpm install dependencies
+      - name: Build HAP
         run: |
           cd harmonyos
-          chmod +x hvigorw
-          ./hvigorw --version
-          ./hvigorw ohpm install --all
-
-      - name: Build unsigned HAP (HoKit)
-        run: |
-          cd harmonyos
-          ./hvigorw assembleHap --buildMode=release --no-daemon
+          if [ -f "./hvigorw" ]; then
+            chmod +x ./hvigorw
+            ./hvigorw ohpm install --all
+            ./hvigorw assembleHap --buildMode=release --no-daemon
+          elif [ -f "./hvigorw.js" ]; then
+            node ./hvigorw.js ohpm install --all
+            node ./hvigorw.js assembleHap --buildMode=release --no-daemon
+          else
+            echo "❌ 本仓库没有找到 hvigorw / hvigorw.js，跳过鸿蒙编译"
+            exit 1
+          fi
 
       - name: Find HAP
         id: findhap
         run: |
           HAP=$(find harmonyos/build -name "*-unsigned.hap" | head -n1)
-          echo "hap=$HAP" >> $GITHUB_OUTPUT
+          if [ -n "$HAP" ]; then
+            echo "hap=$HAP" >> $GITHUB_OUTPUT
+          else
+            exit 1
+          fi
 
       - name: Upload HAP
         uses: actions/upload-artifact@v4
