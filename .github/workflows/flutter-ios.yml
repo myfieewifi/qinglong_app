@@ -30,7 +30,7 @@ jobs:
             echo "使用 $XCODE"
             sudo xcode-select -s "$XCODE"
           else
-            echo "::warning::当前 macOS 镜像只提供 Xcode 15+，Flutter 3.3.10 很可能编译失败；需升级工程到 Dart 3 + 新版 Flutter"
+            echo "::notice::镜像无 Xcode 14，使用默认 Xcode。老 pod 的 libarclite 问题已在 ios/Podfile 中通过抬高 deployment target 处理"
           fi
           xcodebuild -version
 

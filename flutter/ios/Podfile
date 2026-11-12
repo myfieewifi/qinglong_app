@@ -37,5 +37,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # 老 pod（Toast 等）的 podspec 把 deployment target 写在 iOS 8/9，
+    # 链接时需要 libarclite，而 Xcode 14.3+ 起已不再附带该库：
+    #   clang: error: SDK does not contain 'libarclite' ...
+    # 这里把所有 Pods target 统一抬到 14.0（与上面 platform 一致），绕开 libarclite。
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+    end
   end
 end
