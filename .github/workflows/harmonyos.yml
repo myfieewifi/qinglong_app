@@ -17,25 +17,22 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Download hos-sdk & load env
-        run: |
-          wget -O hos-sdk.zip https://github.com/harmonyos-dev/hos-sdk/releases/latest/download/hos-sdk.zip
-          unzip -q hos-sdk.zip -d ./hos-sdk
-          source ./hos-sdk/env.sh
-          echo "HOS_SDK_HOME=$PWD/hos-sdk" >> $GITHUB_ENV
-          echo "$PWD/hos-sdk/bin" >> $GITHUB_PATH
+      - name: Install Node.js (hvigor 依赖node)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Ohpm install dependencies
         run: |
-          source ./hos-sdk/env.sh
           cd harmonyos
-          ohpm install --all
+          chmod +x hvigorw
+          ./hvigorw --version
+          ./hvigorw ohpm install --all
 
       - name: Build unsigned HAP (HoKit)
         run: |
-          source ./hos-sdk/env.sh
           cd harmonyos
-          hvigorw assembleHap --buildMode=release --no-daemon
+          ./hvigorw assembleHap --buildMode=release --no-daemon
 
       - name: Find HAP
         id: findhap
