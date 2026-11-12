@@ -11,14 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 本工程是 Flutter 3.3 时代的老项目：pubspec.yaml 与 pubspec.lock 都锁定
-      # Dart ">=2.18.0 <3.0.0"。Flutter >= 3.10 自带 Dart 3，pub get 会直接
-      # version solving failed。3.7.12 是最后一个 Dart 2.19 稳定版，
-      # 与工程里的 AGP 4.1.0 / Gradle 6.7 / Kotlin 1.6.10 / JDK 11 是同一套年代的组合。
+      # 版本必须跟 pubspec.lock 对齐，不能随便选新的：
+      #   pubspec.yaml / pubspec.lock 要求 Dart ">=2.18.0 <3.0.0" → Flutter 最高 3.7.x
+      #   pubspec.lock 锁 intl 0.17.0，而 Flutter 3.7 的 flutter_localizations 要 intl 0.18.0
+      #   → 只有 Flutter 3.3.x（自带 intl 0.17.0、Dart 2.18）能原样复用现有 lock 文件。
+      # 该版本也与工程里的 AGP 4.1.0 / Gradle 6.7 / Kotlin 1.6.10 / JDK 11 同年代。
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.7.12'
+          flutter-version: '3.3.10'
           cache: true
 
       - name: Setup JDK 11

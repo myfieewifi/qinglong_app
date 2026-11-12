@@ -8,27 +8,41 @@ on:
 jobs:
   build-hos:
     runs-on: ubuntu-latest
-    # 仓库里没有 hvigorw / hvigorw.js（harmonyos/ 下只有 hvigorfile.ts 和 hvigor/），
-    # 原 workflow 每次都会走到 else 分支 exit 1。这里直接跳过，不再每次 push 挂红叉。
-    # 另外 HAP 构建依赖 DevEco Studio 的 HarmonyOS SDK，GitHub 托管 runner 上没有；
-    # 真要出 HAP，需要补 hvigorw 包装脚本 + 自带 SDK 的 self-hosted runner。
-    if: ${{ hashFiles('harmonyos/hvigorw', 'harmonyos/hvigorw.js') != '' }}
     continue-on-error: true  # 鸿蒙失败不影响其它平台的构建结论
     steps:
       - uses: actions/checkout@v4
 
+      # 注意：hashFiles 不能写在 job 级 if 里（GitHub 会判定整个 workflow 无效），
+      # 所以改成在 step 里探测，再由后续步骤的 if 决定是否执行。
+      # 当前仓库 harmonyos/ 下只有 hvigorfile.ts 和 hvigor/，没有 hvigorw / hvigorw.js，
+      # 因此默认走"跳过"分支，不再每次 push 挂红叉。
+      # 真要出 HAP：补 hvigorw 包装脚本 + 带 DevEco HarmonyOS SDK 的 self-hosted runner
+      # （GitHub 托管 runner 上没有 HarmonyOS SDK，补了脚本也编不出来）。
+      - name: Check hvigor wrapper
+        id: check
+        run: |
+          if [ -f harmonyos/hvigorw ] || [ -f harmonyos/hvigorw.js ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::未找到 hvigorw/hvigorw.js，跳过鸿蒙构建"
+          fi
+
       - name: Setup JDK17
+        if: steps.check.outputs.found == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
 
       - name: Install Node.js
+        if: steps.check.outputs.found == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Build HAP
+        if: steps.check.outputs.found == 'true'
         run: |
           cd harmonyos
           if [ -f "./hvigorw" ]; then
@@ -41,6 +55,7 @@ jobs:
           fi
 
       - name: Find HAP
+        if: steps.check.outputs.found == 'true'
         id: findhap
         run: |
           # 产物在 entry 模块的 build 目录下，不是 harmonyos/build
@@ -53,6 +68,7 @@ jobs:
           fi
 
       - name: Upload HAP
+        if: steps.check.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: qinglong-client-hokit-hap
