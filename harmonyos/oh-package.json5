@@ -1,0 +1,12 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "qinglong_harmonyos",
+  "version": "1.0.0",
+  "author": "孟云",
+  "description": "青龙客户端 - 纯血鸿蒙 ArkTS 原生客户端，移植自 hicongcn/qinglong_app",
+  "license": "AGPL-3.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hypium": "1.0.19"
+  }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeMirror</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/dracula.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/default.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  textarea#code { width: 100%; height: 100%; border: none; padding: 12px;
+    font-family: monospace; font-size: 14px; resize: none; }
+  .CodeMirror { height: 100%; font-size: 14px; }
+</style>
+</head>
+<body>
+<textarea id="code"></textarea>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/shell/shell.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/yaml/yaml.js"></script>
+<script>
+  var editor = null;
+  var ta = document.getElementById('code');
+  function init() {
+    if (typeof CodeMirror === 'undefined') return;
+    editor = CodeMirror.fromTextArea(ta, {
+      lineNumbers: true,
+      lineWrapping: true,
+      theme: 'dracula',
+      tabSize: 2,
+      mode: 'shell'
+    });
+  }
+  window.setCode = function (text) {
+    var v = text == null ? '' : text;
+    if (editor) { editor.setValue(v); } else { ta.value = v; }
+  };
+  window.getCode = function () {
+    if (editor) { return editor.getValue(); }
+    return ta.value;
+  };
+  window.setTheme = function (t) {
+    if (editor) { editor.setOption('theme', t || 'dracula'); }
+  };
+  window.setMode = function (m) {
+    if (editor) { editor.setOption('mode', m || 'shell'); }
+  };
+  init();
+</script>
+</body>
+</html>

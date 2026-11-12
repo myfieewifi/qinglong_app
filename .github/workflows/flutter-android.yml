@@ -1,0 +1,62 @@
+name: Flutter Android (APK)
+
+# 由原 hicongcn/qinglong_app Flutter 工程出 Android 安装包。
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FLUTTER_DIR: flutter
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 原工程 pubspec sdk 约束为 >=2.18.0 <3.0.0，使用 Dart 2.19 对应的 Flutter 3.7.12；
+      # 如本机 Flutter 版本更高、已放宽约束，可调整 flutter-version。
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.7.12'
+          channel: 'stable'
+
+      - name: Resolve dependencies
+        working-directory: ${{ env.FLUTTER_DIR }}
+        run: flutter pub get
+
+      - name: Build release APK
+        working-directory: ${{ env.FLUTTER_DIR }}
+        run: flutter build apk --release
+
+      - name: Locate APK
+        id: find_apk
+        working-directory: ${{ env.FLUTTER_DIR }}
+        run: |
+          APK=$(find build/app/outputs/flutter-apk -name "*.apk" | head -n1)
+          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
+          echo "APK: $APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: qinglong-client-android-apk
+          path: ${{ env.FLUTTER_DIR }}/${{ steps.find_apk.outputs.apk_path }}
+
+      - name: Attach to Release (tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.FLUTTER_DIR }}/${{ steps.find_apk.outputs.apk_path }}
+          generate_release_notes: true

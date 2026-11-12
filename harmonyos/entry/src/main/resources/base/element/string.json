@@ -1,0 +1,12 @@
+{
+  "string": [
+    { "name": "app_name", "value": "青龙客户端" },
+    { "name": "module_desc", "value": "青龙面板鸿蒙客户端" },
+    { "name": "ability_desc", "value": "青龙面板鸿蒙客户端入口" },
+    { "name": "permission_internet_reason", "value": "用于连接并管理你的青龙面板" },
+    { "name": "tab_task", "value": "定时任务" },
+    { "name": "tab_env", "value": "环境变量" },
+    { "name": "tab_config", "value": "配置文件" },
+    { "name": "tab_mine", "value": "我的" }
+  ]
+}

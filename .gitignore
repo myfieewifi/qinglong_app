@@ -1,0 +1,33 @@
+# ===== Flutter / Android / iOS =====
+flutter/.dart_tool/
+flutter/build/
+flutter/.flutter-plugins
+flutter/.flutter-plugins-dependencies
+flutter/.packages
+flutter/ios/Pods/
+flutter/ios/Flutter/Flutter.framework
+flutter/ios/Flutter/Flutter.podspec
+flutter/android/.gradle/
+flutter/android/local.properties
+flutter/**/.idea/
+flutter/**/*.iml
+
+# ===== HarmonyOS =====
+harmonyos/oh_modules/
+harmonyos/entry/oh_modules/
+harmonyos/build/
+harmonyos/entry/build/
+harmonyos/.hvigor/
+harmonyos/local.properties
+*.hap
+*.har
+*.hsp
+
+# ===== IDE / OS =====
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+*.log
