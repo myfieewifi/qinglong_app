@@ -40,12 +40,35 @@ jobs:
 
       # 不用手动 pod install --repo-update：flutter build ipa 会按需执行 pod install，
       # --repo-update 每次全量更新 CocoaPods specs 仓库，白白多花好几分钟。
-      - name: Build unsigned IPA (TrollStore --no-codesign)
+      - name: Build unsigned archive (TrollStore --no-codesign)
         working-directory: flutter
         run: flutter build ipa --release --no-codesign --build-name=1.0.0 --build-number=1
+
+      # 注意：--no-codesign 时 Flutter 只产出 Runner.xcarchive，日志会明确打印
+      # "Codesigning disabled with --no-codesign, skipping IPA."，不会生成 ipa 目录。
+      # TrollStore 用的未签名 IPA 自己打：IPA = Payload/*.app 的 zip。
+      - name: Package unsigned IPA from xcarchive
+        working-directory: flutter
+        run: |
+          APP=$(find build/ios/archive -maxdepth 4 -path '*/Products/Applications/*.app' | head -n1)
+          if [ -z "$APP" ]; then
+            echo "::error::xcarchive 里没有找到 .app"
+            exit 1
+          fi
+          echo "打包 $APP"
+          rm -rf build/ios/ipa
+          mkdir -p build/ios/ipa/Payload
+          cp -R "$APP" build/ios/ipa/Payload/
+          rm -rf build/ios/ipa/Payload/*.app/_CodeSignature
+          rm -f build/ios/ipa/Payload/*.app/embedded.mobileprovision
+          cd build/ios/ipa
+          zip -qry qinglong-client-unsigned.ipa Payload
+          ls -lh qinglong-client-unsigned.ipa
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: qinglong-client-trollstore-ipa
           path: flutter/build/ios/ipa/*.ipa
+          # 默认 warn 会造成"步骤成功但产物为空"的假绿，这里直接判失败
+          if-no-files-found: error

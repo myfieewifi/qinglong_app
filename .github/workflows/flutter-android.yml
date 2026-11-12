@@ -61,3 +61,4 @@ jobs:
         with:
           name: qinglong-client-android-apk
           path: flutter/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
