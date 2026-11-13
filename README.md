@@ -31,7 +31,7 @@ qinglong-client/
 ├── .github/workflows/
 │   ├── flutter-android.yml      # Flutter 构建 release APK
 │   ├── flutter-ios.yml          # macOS 构建 iOS 归档（默认未签名）
-│   └── harmonyos.yml             # hos-sdk 拉取命令行工具 + hvigor 构建 HAP
+│   └── harmonyos.yml             # setup-ohos 安装鸿蒙命令行工具 + hvigorw 构建 HAP
 │
 ├── docs/
 │   └── DIFF.md                   # 三端功能 / UI 对齐差异与已知限制
@@ -64,9 +64,10 @@ qinglong-client/
 - 要出可安装的签名 IPA，需在仓库 **Secrets** 配置：开发者证书 `.p12`、描述文件、证书密码，并启用工作流末尾注释掉的签名 / `flutter build ipa` 步骤。
 
 ### 3. 鸿蒙 NEXT（`harmonyos.yml`）
-- SDK 获取参考公开仓库 [harmonyos-dev/hos-sdk](https://github.com/harmonyos-dev/hos-sdk)：从其 latest release 下载 Linux 命令行工具包 → `sdkmgr install` 安装 toolchains → 配置 `HOS_SDK_HOME` → `ohpm install` → `hvigor assembleHap`。
-- 产物：`qinglong-client-harmonyos-hap`（Artifact）；打 tag 时附加到 Release。
-- **限制**：hos-sdk 提供的是 OpenHarmony toolchains；纯血 HarmonyOS NEXT 商业 SDK 的兼容性需首次跑通后核对。HAP 默认未签名，真机安装需调试 Profile / 发布证书（工作流末尾预留签名步骤）。
+- Runner 本身没有鸿蒙 SDK，工作流用 Marketplace 的 [ErBWs/setup-ohos](https://github.com/marketplace/actions/setup-harmonyos-tools) 自动安装鸿蒙命令行工具（含 `hvigorw` / `ohpm` / SDK，版本 `5.0.13.200`，与 `compatibleSdkVersion 5.0.1(13)` 同代）。
+- 流程：安装 `libgl1` → `setup-ohos` → `ohpm install --all` → `hvigorw assembleHap`。
+- 产物：`qinglong-client-harmonyos-hap`（Artifact，未签名 HAP）。
+- **限制**：HAP 默认未签名，真机安装需调试 Profile / 发布证书，可在 DevEco Studio 中签名或用 `hdc` / `hap-sign` 自行处理。
 
 ## 四、本地构建前置条件
 

@@ -1,4 +1,4 @@
-name: HarmonyOS NEXT Build (HoKit Unsigned HAP)
+name: HarmonyOS NEXT Build (Unsigned HAP)
 on:
   push:
     branches: [ main ]
@@ -8,58 +8,53 @@ on:
 jobs:
   build-hos:
     runs-on: ubuntu-latest
-    continue-on-error: true  # 鸿蒙失败不影响其它平台的构建结论
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      # 注意：hashFiles 不能写在 job 级 if 里（GitHub 会判定整个 workflow 无效），
-      # 所以改成在 step 里探测，再由后续步骤的 if 决定是否执行。
-      # 当前仓库 harmonyos/ 下只有 hvigorfile.ts 和 hvigor/，没有 hvigorw / hvigorw.js，
-      # 因此默认走"跳过"分支，不再每次 push 挂红叉。
-      # 真要出 HAP：补 hvigorw 包装脚本 + 带 DevEco HarmonyOS SDK 的 self-hosted runner
-      # （GitHub 托管 runner 上没有 HarmonyOS SDK，补了脚本也编不出来）。
-      - name: Check hvigor wrapper
-        id: check
+      # hvigor / ohpm 的纹理压缩工具依赖 libGL（仅 Linux runner 需要）
+      - name: Install libGL
         run: |
-          if [ -f harmonyos/hvigorw ] || [ -f harmonyos/hvigorw.js ]; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::未找到 hvigorw/hvigorw.js，跳过鸿蒙构建"
-          fi
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-dev
+
+      # GitHub 托管 runner 上没有鸿蒙 SDK，需要显式安装命令行工具。
+      # 版本 5.0.13.200 与本工程 compatibleSdkVersion 5.0.1(13) / hvigor 5.0.0 同代；
+      # 若 hvigor 报 SDK 版本不匹配，优先调整此 version（可选版本见 ErBWs/ohos-sdk releases）。
+      - name: Setup HarmonyOS CLI tools
+        uses: ErBWs/setup-ohos@v2
+        with:
+          version: 5.0.13.200
+          cache: true
 
       - name: Setup JDK17
-        if: steps.check.outputs.found == 'true'
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Install Node.js
-        if: steps.check.outputs.found == 'true'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: ohpm install
+        working-directory: harmonyos
+        run: ohpm install --all
+
+      # hvigorw / ohpm 均已由 setup-ohos 加入 PATH，可直接调用；
+      # 等价命令行构建方式见 harmonyos/README.md 第五节。
       - name: Build HAP
-        if: steps.check.outputs.found == 'true'
+        working-directory: harmonyos
         run: |
-          cd harmonyos
-          if [ -f "./hvigorw" ]; then
-            chmod +x ./hvigorw
-            ./hvigorw ohpm install --all
-            ./hvigorw assembleHap --buildMode=release --no-daemon
-          else
-            node ./hvigorw.js ohpm install --all
-            node ./hvigorw.js assembleHap --buildMode=release --no-daemon
-          fi
+          hvigorw --mode module -p product=default -p buildMode=release \
+            assembleHap --no-daemon --accept-license
 
       - name: Find HAP
-        if: steps.check.outputs.found == 'true'
         id: findhap
         run: |
           # 产物在 entry 模块的 build 目录下，不是 harmonyos/build
-          HAP=$(find harmonyos/entry/build harmonyos/build -name "*-unsigned.hap" 2>/dev/null | head -n1)
+          HAP=$(find harmonyos/entry/build -name "*-unsigned.hap" | head -n1)
           if [ -n "$HAP" ]; then
             echo "hap=$HAP" >> $GITHUB_OUTPUT
           else
@@ -68,8 +63,8 @@ jobs:
           fi
 
       - name: Upload HAP
-        if: steps.check.outputs.found == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: qinglong-client-hokit-hap
+          name: qinglong-client-harmonyos-hap
           path: ${{ steps.findhap.outputs.hap }}
+          if-no-files-found: error

@@ -80,15 +80,15 @@ hvigorw assembleHap --mode module -p product=default -p buildMode=debug --no-dae
 
 ## 六、GitHub Actions 构建
 
-工作流位于仓库根目录：`.github/workflows/harmonyos.yml`。SDK 获取 / 环境配置参考公开仓库 [harmonyos-dev/hos-sdk](https://github.com/harmonyos-dev/hos-sdk)：
+工作流位于仓库根目录：`.github/workflows/harmonyos.yml`。GitHub 托管 runner 本身没有鸿蒙 SDK，工作流通过 Marketplace 的 [ErBWs/setup-ohos](https://github.com/marketplace/actions/setup-harmonyos-tools) 自动下载并安装鸿蒙命令行工具（含 `hvigorw` / `ohpm` / SDK，版本 `5.0.13.200`，与 `compatibleSdkVersion 5.0.1(13)` / hvigor 5.0.0 同代）：
 
-1. 从 hos-sdk latest release 拉取 `commandline-tools-linux-*.zip`；
-2. `sdkmgr install toolchains:9 OpenHarmony/toolchains:9 --accept-license`；
-3. 配置 `HOS_SDK_HOME`，`ohpm install --all`；
-4. `hvigor --mode module -p product=default assembleHap --no-daemon --accept-license`；
-5. 产物 `qinglong-client-harmonyos-hap`（Artifact）；打 `v*` tag 时自动附加到 Release。
+1. 安装 `libgl1`（Linux 纹理压缩依赖）；
+2. `setup-ohos` 安装命令行工具与 SDK，并提供 `hvigorw` / `ohpm` 可执行文件；
+3. `ohpm install --all`；
+4. `hvigorw --mode module -p product=default -p buildMode=release assembleHap --no-daemon --accept-license`；
+5. 产物 `qinglong-client-harmonyos-hap`（Artifact，未签名 HAP）。
 
-> 说明：hos-sdk 提供的是 OpenHarmony toolchains；与纯血 HarmonyOS NEXT 商业 SDK 的兼容性需首次跑通后核对。默认产出未签名 HAP，真机安装需调试 Profile / 发布证书（工作流末尾预留签名步骤）。
+> 说明：默认产出未签名 HAP，真机安装需调试 Profile / 发布证书（可用 DevEco Studio 或 `hdc` / `hap-sign` 自行签名）。若后续升级 SDK 版本，注意同步调整工作流中的 `version` 与 `hvigor/hvigor-config.json5` 中的 `hvigorVersion`。
 
 ## 七、接口与鉴权说明
 
