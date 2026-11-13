@@ -1,25 +1,30 @@
 {
   // 工程级构建配置。runtimeOS 固定为 HarmonyOS（纯血 NEXT）。
-  // compatibleSdkVersion 括号内为 API Level：(12)=API12，(13)=API13。
-  // 若本机 DevEco SDK 版本不同，首次打开工程时按提示同步即可。
+  // 对齐 CI 实证组合（yunying / moonlight-harmony）：
+  //   - modelVersion 5.0.0 工程 + CLI 内置现代 hvigor 6.x 可构建
+  //   - compatibleSdkVersion 5.0.1(13)：目标 API 13
+  //   - compileSdkVersion / targetSdkVersion 省略：默认使用 CLI 工具内置 SDK
+  //   - signingConfigs 留空且产品不引用 signingConfig：CI 产出未签名 HAP
   "app": {
     "signingConfigs": [],
     "products": [
       {
         "name": "default",
-        "signingConfig": "default",
         "versionCode": 1000000,
         "versionName": "1.0.0",
         "compatibleSdkVersion": "5.0.1(13)",
-        "targetSdkVersion": "5.0.1(13)",
-        "compileSdkVersion": "5.0.1(13)",
         "runtimeOS": "HarmonyOS",
         "buildOption": {
           "strictMode": {
-            "caseSensitiveCheck": true
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
           }
         }
       }
+    ],
+    "buildModeSet": [
+      { "name": "debug" },
+      { "name": "release" }
     ]
   },
   "modules": [
