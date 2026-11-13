@@ -1,70 +1,64 @@
-name: HarmonyOS NEXT Build (Unsigned HAP)
+name: Build QingLong HarmonyOS HAP
+
 on:
-  push:
-    branches: [ main ]
-    tags: [ 'v*' ]
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['harmonyos/**', '.github/workflows/harmonyos.yml']
+    tags: ['v*']
 
 jobs:
-  build-hos:
+  build-harmonyos:
+    name: Build HarmonyOS HAP
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      # hvigor / ohpm 的纹理压缩工具依赖 libGL（仅 Linux runner 需要）
-      - name: Install libGL
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # libGL1：SDK 纹理压缩工具依赖（Linux）
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libgl1-mesa-dev
 
-      # GitHub 托管 runner 上没有鸿蒙 SDK，需要显式安装命令行工具。
-      # 版本 5.0.13.200 与本工程 compatibleSdkVersion 5.0.1(13) / hvigor 5.0.0 同代；
-      # 若 hvigor 报 SDK 版本不匹配，优先调整此 version（可选版本见 ErBWs/ohos-sdk releases）。
+      # 从 ErBWs/ohos-sdk 公共镜像下载 DevEco Command Line Tools（含 SDK + hvigor + ohpm + node）
       - name: Setup HarmonyOS CLI tools
         uses: ErBWs/setup-ohos@v2
         with:
-          version: 5.0.13.200
+          version: 6.1.1.280
           cache: true
 
-      - name: Setup JDK17
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: 'temurin'
+      # @ohos/hvigor 仅发布在 repo.harmonyos.com（华为云镜像无该包，packument 404）
+      - name: Configure registries
+        run: |
+          echo "@ohos:registry=https://repo.harmonyos.com/npm/" > ~/.npmrc
+          ohpm config set registry https://ohpm.openharmony.cn/ohpm/ || true
+          ohpm config set strict_ssl false || true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Show toolchain
+        run: |
+          node -v
+          ohpm -v || true
+          hvigorw -v || true
 
-      - name: ohpm install
+      - name: Install ohpm dependencies
         working-directory: harmonyos
-        run: ohpm install --all
+        run: ohpm install --all || echo "no ohpm dependencies"
 
-      # hvigorw / ohpm 均已由 setup-ohos 加入 PATH，可直接调用；
-      # 等价命令行构建方式见 harmonyos/README.md 第五节。
-      - name: Build HAP
+      - name: Build HAP (unsigned)
         working-directory: harmonyos
         run: |
-          hvigorw --mode module -p product=default -p buildMode=release \
-            assembleHap --no-daemon --accept-license
-
-      - name: Find HAP
-        id: findhap
-        run: |
-          # 产物在 entry 模块的 build 目录下，不是 harmonyos/build
-          HAP=$(find harmonyos/entry/build -name "*-unsigned.hap" | head -n1)
-          if [ -n "$HAP" ]; then
-            echo "hap=$HAP" >> $GITHUB_OUTPUT
-          else
-            echo "未找到 unsigned HAP 产物"
-            exit 1
-          fi
+          hvigorw assembleHap --mode module -p product=default -p buildMode=release --no-daemon --stacktrace
 
       - name: Upload HAP
         uses: actions/upload-artifact@v4
         with:
-          name: qinglong-client-harmonyos-hap
-          path: ${{ steps.findhap.outputs.hap }}
+          name: qinglong-harmonyos-hap-${{ github.run_id }}
+          path: harmonyos/entry/build/default/outputs/**/*.hap
           if-no-files-found: error
+          retention-days: 7
