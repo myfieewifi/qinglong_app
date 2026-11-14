@@ -58,7 +58,11 @@ export class HttpClient {
       'User-Agent': UA,
       'Content-Type': 'application/json;charset=UTF-8'
     };
-    const finalQuery: Record<string, string> = { ...query };
+    const finalQuery: Record<string, string> = {};
+    const queryKeys = Object.keys(query);
+    for (const k of queryKeys) {
+      finalQuery[k] = query[k];
+    }
 
     if (!Urls.inWhiteList(path)) {
       finalQuery['t'] = `${Math.floor(Date.now() / 1000)}`;
@@ -81,7 +85,7 @@ export class HttpClient {
         expectDataType: http.HttpDataType.STRING
       });
 
-      if (resp.responseStatusCode === 401 && !Urls.inWhiteList(path)) {
+      if (resp.responseCode === 401 && !Urls.inWhiteList(path)) {
         if (this.onUnauthorized) {
           this.onUnauthorized();
         }
@@ -92,12 +96,12 @@ export class HttpClient {
       if (typeof result === 'string') {
         const text = result as string;
         if (text.length === 0) {
-          return new HttpResponse<T>(true, resp.responseStatusCode, '', null);
+          return new HttpResponse<T>(true, resp.responseCode, '', null);
         }
         result = JSON.parse(text) as Object;
       }
 
-      if (resp.responseStatusCode === 200) {
+      if (resp.responseCode === 200) {
         const root: JsonMap = asMap(result);
         const code = Number(root['code'] ?? 200);
         if (code === 200) {
@@ -112,8 +116,8 @@ export class HttpClient {
       }
 
       const root2: JsonMap = asMap(result);
-      const msg2 = root2['message'] ? root2['message'].toString() : `HTTP ${resp.responseStatusCode}`;
-      return new HttpResponse<T>(false, resp.responseStatusCode, msg2, null);
+      const msg2 = root2['message'] ? root2['message'].toString() : `HTTP ${resp.responseCode}`;
+      return new HttpResponse<T>(false, resp.responseCode, msg2, null);
     } catch (e) {
       Logger.e('request error: ' + (e as Error).message);
       return new HttpResponse<T>(false, 400, (e as Error).message, null);

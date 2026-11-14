@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { HttpResponse, LoginBean } from '../common/model/Models';
 import { AppStore, AccountInfo } from '../common/store/AppStore';
@@ -109,8 +109,7 @@ struct LoginPage {
           .onChange((v: string) => { this.twoFactor = v; });
       }
 
-      PrimaryButton({ label: this.loading ? '登录中…' : '登录', enabled: !this.loading })
-        .onTap(() => { this.submit(); });
+      PrimaryButton({ label: this.loading ? '登录中…' : '登录', btnEnabled: !this.loading, onTap: () => { this.submit(); } });
 
       Text('支持账号密码登录；如开启两步验证，登录后补充验证码。')
         .fontSize(12).fontColor($r('app.color.text_secondary'))

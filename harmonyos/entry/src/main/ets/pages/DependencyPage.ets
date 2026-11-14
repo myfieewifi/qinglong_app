@@ -56,7 +56,7 @@ struct DependencyPage {
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
-        EmptyView('暂无依赖');
+        EmptyView({ message: '暂无依赖' });
       } else {
         List({ space: 10 }) {
           ForEach(this.list, (d: DependencyBean) => {
@@ -72,8 +72,8 @@ struct DependencyPage {
                   Text(d.remark).fontSize(12).fontColor($r('app.color.text_secondary'));
                 }
                 Row({ space: 8 }) {
-                  Button('重装').size(ButtonSize.Small).onClick(() => { this.reinstall(d); });
-                  Button('日志').size(ButtonSize.Small).onClick(() => { this.viewLog(d); });
+                  Button('重装').height(32).fontSize(13).onClick(() => { this.reinstall(d); });
+                  Button('日志').height(32).fontSize(13).onClick(() => { this.viewLog(d); });
                 }
               }
               .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12);

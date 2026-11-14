@@ -1,6 +1,6 @@
 import { UIAbility, AbilityConstant, Want } from '@kit.AbilityKit';
 import window from '@ohos.window';
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { AppStore } from '../common/store/AppStore';
 import { HttpClient } from '../common/http/HttpClient';
 import { Logger } from '../common/utils/Logger';

@@ -13,7 +13,6 @@
     "pages/LoginLogPage",
     "pages/AppKeyPage",
     "pages/AppKeyEditPage",
-    "pages/SettingPage",
     "pages/AboutPage",
     "pages/ChangePasswordPage"
   ]

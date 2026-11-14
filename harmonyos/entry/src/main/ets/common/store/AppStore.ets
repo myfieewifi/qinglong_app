@@ -53,7 +53,7 @@ export class AppStore {
 
   async init(context: Context): Promise<void> {
     this.pref = await dataPreferences.getPreferences(context, STORE_NAME);
-    const raw = this.pref.getString(KEY_ACCOUNTS, '[]');
+    const raw = this.pref.getSync(KEY_ACCOUNTS, '[]') as string;
     try {
       const arr = JSON.parse(raw) as Object[];
       this.accounts = arr.map((x: Object): AccountInfo =>
@@ -92,8 +92,8 @@ export class AppStore {
     if (!this.pref) {
       return;
     }
-    await this.pref.set(KEY_ACCOUNTS, JSON.stringify(this.accounts.map(a => a.toJson())));
-    await this.pref.set(KEY_CURRENT, this.currentIndex);
+    this.pref.putSync(KEY_ACCOUNTS, JSON.stringify(this.accounts.map(a => a.toJson())));
+    this.pref.putSync(KEY_CURRENT, this.currentIndex);
     await this.pref.flush();
     this.syncAppStorage();
   }

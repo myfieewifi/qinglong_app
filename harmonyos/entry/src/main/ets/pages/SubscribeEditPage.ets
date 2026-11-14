@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -8,7 +8,7 @@ import { PrimaryButton } from '../common/components/Common';
 @Entry
 @Component
 struct SubscribeEditPage {
-  @State id: number = 0;
+  @State subId: number = 0;
   @State isEdit: boolean = false;
   @State name: string = '';
   @State url: string = '';
@@ -36,7 +36,7 @@ struct SubscribeEditPage {
     if (params && params['bean'] !== undefined) {
       const bean = asMap(JSON.parse(params['bean'].toString()) as Object);
       this.isEdit = true;
-      this.id = getNumber(bean, 'id');
+      this.subId = getNumber(bean, 'id');
       this.name = getString(bean, 'name');
       this.url = getString(bean, 'url');
       this.branch = getString(bean, 'branch');
@@ -90,22 +90,26 @@ struct SubscribeEditPage {
       'url': this.url.trim()
     };
     if (this.isEdit) {
-      params['id'] = this.id;
+      params['id'] = this.subId;
     }
     if (this.scheduleType === 'cron') {
       params['schedule'] = this.cron.trim();
     } else {
-      params['interval_schedule'] = {
+      const intervalSchedule: Record<string, Object> = {
         'type': this.intervalUnit,
         'value': parseInt(this.intervalValue, 10) || 0
       };
+      params['interval_schedule'] = intervalSchedule;
     }
     if (this.type === 'private') {
       params['pull_type'] = this.pullType;
       if (this.pullType === 'userName') {
-        params['pull_option'] = { 'username': this.username, 'password': this.password };
+        const pullOption: Record<string, Object> =
+          { 'username': this.username, 'password': this.password };
+        params['pull_option'] = pullOption;
       } else {
-        params['pull_option'] = { 'private_key': this.privateKey };
+        const pullOption: Record<string, Object> = { 'private_key': this.privateKey };
+        params['pull_option'] = pullOption;
       }
     }
     if (this.type !== 'single') {
@@ -131,7 +135,7 @@ struct SubscribeEditPage {
   Seg(options: string[], current: string, onPick: (v: string) => void) {
     Row({ space: 8 }) {
       ForEach(options, (opt: string) => {
-        Button(opt).size(ButtonSize.Small)
+        Button(opt).height(32).fontSize(13)
           .backgroundColor(current === opt ? $r('app.color.brand_color') : Color.White)
           .fontColor(current === opt ? Color.White : $r('app.color.text_primary'))
           .onClick(() => { onPick(opt); });
@@ -222,8 +226,7 @@ struct SubscribeEditPage {
         }.width('100%');
       }.layoutWeight(1).scrollBar(BarState.Auto);
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', enabled: !this.saving })
-        .onTap(() => { this.submit(); });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } });
     }
     .width('100%').height('100%').padding(20)
     .backgroundColor($r('app.color.bg_page'));

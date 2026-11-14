@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { ConfigBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -36,7 +36,7 @@ export struct ConfigPage {
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
-        EmptyView('暂无配置文件');
+        EmptyView({ message: '暂无配置文件' });
       } else {
         List({ space: 10 }) {
           ForEach(this.list, (c: ConfigBean, index: number) => {

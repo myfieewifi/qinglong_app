@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { AppStore } from '../common/store/AppStore';
 import { toast } from '../common/components/Toast';
@@ -55,8 +55,7 @@ struct ChangePasswordPage {
         .height(48).borderRadius(12).backgroundColor(Color.White)
         .onChange((v: string) => { this.confirm = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', enabled: !this.saving })
-        .onTap(() => { this.save(); });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
     }
     .width('100%').height('100%').padding(20)
     .backgroundColor($r('app.color.bg_page'));

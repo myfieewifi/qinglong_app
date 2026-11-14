@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { EnvBean, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -11,7 +11,7 @@ struct EnvEditPage {
   @State value: string = '';
   @State remarks: string = '';
   @State sId: string = '';
-  @State id: number = 0;
+  @State envId: number = 0;
   @State saving: boolean = false;
   private api: Api = new Api();
 
@@ -23,7 +23,7 @@ struct EnvEditPage {
       this.value = bean.value;
       this.remarks = bean.remarks;
       this.sId = bean.sId;
-      this.id = bean.id;
+      this.envId = bean.id;
     }
   }
 
@@ -40,7 +40,7 @@ struct EnvEditPage {
     };
     if (this.sId.length > 0) {
       payload['_id'] = this.sId;
-      payload['id'] = this.id;
+      payload['id'] = this.envId;
     }
     const resp = await this.api.saveEnv(payload);
     this.saving = false;
@@ -69,8 +69,7 @@ struct EnvEditPage {
         .height(48).borderRadius(12).backgroundColor(Color.White)
         .onChange((v: string) => { this.remarks = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', enabled: !this.saving })
-        .onTap(() => { this.save(); });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
     }
     .width('100%').height('100%').padding(20)
     .backgroundColor($r('app.color.bg_page'));

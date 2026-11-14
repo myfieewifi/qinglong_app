@@ -1,10 +1,10 @@
-import { router } from '@ohos.router';
-import { webview } from '@ohos.web.webview';
+import router from '@ohos.router';
+import webview from '@ohos.web.webview';
 import { Api } from '../common/api/Api';
 import { TaskBean, JsonMap, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
 import { PrimaryButton } from '../common/components/Common';
-import { CodeMirrorEditor } from '../common/components/CodeMirrorEditor';
+import { CodeMirrorEditor, WebCodeBridge } from '../common/components/CodeMirrorEditor';
 
 @Entry
 @Component
@@ -14,7 +14,7 @@ struct TaskEditPage {
   @State schedule: string = '';
   @State remarks: string = '';
   @State sId: string = '';
-  @State id: number = 0;
+  @State taskId: number = 0;
   @State saving: boolean = false;
   private api: Api = new Api();
   private webCtrl: webview.WebviewController = new webview.WebviewController();
@@ -28,7 +28,7 @@ struct TaskEditPage {
       this.schedule = bean.schedule;
       this.remarks = bean.remarks;
       this.sId = bean.sId;
-      this.id = bean.id;
+      this.taskId = bean.id;
       this.webCtrl.runJavaScript(`setCode(${JSON.stringify(this.command)})`);
     }
   }
@@ -40,8 +40,8 @@ struct TaskEditPage {
     }
     let command = this.command;
     try {
-      const r = await this.webCtrl.runJavaScriptReturningResult('getCode()');
-      if (r) { command = r.toString(); }
+      const r: Object = await this.webCtrl.runJavaScriptReturningResult('getCode()');
+      command = WebCodeBridge.unwrapResult(r, this.command);
     } catch (e) {
       // 兜底沿用本地缓存
     }
@@ -54,7 +54,7 @@ struct TaskEditPage {
     };
     if (this.sId.length > 0) {
       payload['_id'] = this.sId;
-      payload['id'] = this.id;
+      payload['id'] = this.taskId;
     }
     const resp = await this.api.saveTask(payload);
     this.saving = false;
@@ -89,8 +89,7 @@ struct TaskEditPage {
         .height(48).borderRadius(12).backgroundColor(Color.White)
         .onChange((v: string) => { this.remarks = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', enabled: !this.saving })
-        .onTap(() => { this.save(); });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
     }
     .width('100%').height('100%').padding(20)
     .backgroundColor($r('app.color.bg_page'));

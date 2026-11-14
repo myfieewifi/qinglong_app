@@ -29,17 +29,17 @@ export struct EmptyView {
 @Component
 export struct PrimaryButton {
   @State label: string = '确定';
-  @State enabled: boolean = true;
-  onTap?: () => void;
+  @State btnEnabled: boolean = true;
+  onTap: () => void = () => {};
 
   build() {
     Button(this.label)
       .width('100%').height(48)
       .fontSize(16).fontColor(Color.White)
-      .backgroundColor(this.enabled ? $r('app.color.brand_color') : '#9DB8F5')
+      .backgroundColor(this.btnEnabled ? $r('app.color.brand_color') : '#9DB8F5')
       .borderRadius(12)
       .onClick(() => {
-        if (this.enabled && this.onTap) {
+        if (this.btnEnabled) {
           this.onTap();
         }
       });

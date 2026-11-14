@@ -36,7 +36,7 @@ struct LoginLogPage {
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
-        EmptyView('暂无登录日志');
+        EmptyView({ message: '暂无登录日志' });
       } else {
         List({ space: 10 }) {
           ForEach(this.list, (log: LoginLogBean, i: number) => {

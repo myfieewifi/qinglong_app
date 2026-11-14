@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -71,9 +71,9 @@ struct AppKeyPage {
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
-        EmptyView('暂无 AppKey');
+        EmptyView({ message: '暂无 AppKey' });
       } else {
-        Refresh() {
+        Refresh({ refreshing: $$this.refreshing }) {
           List({ space: 10 }) {
             ForEach(this.list, (item: RawMap) => {
               ListItem() {
@@ -83,10 +83,10 @@ struct AppKeyPage {
                   Text(`Client ID：${getString(item, 'client_id') || getString(item, 'appId')}`)
                     .fontSize(12).fontColor($r('app.color.text_secondary'));
                   Row({ space: 8 }) {
-                    Button('编辑').size(ButtonSize.Small).onClick(() => { this.edit(item); });
-                    Button('复制密钥').size(ButtonSize.Small).onClick(() => { this.copySecret(item); });
-                    Button('重置').size(ButtonSize.Small).onClick(() => { this.reset(item); });
-                    Button('删除').size(ButtonSize.Small).fontColor($r('app.color.danger_color'))
+                    Button('编辑').height(32).fontSize(13).onClick(() => { this.edit(item); });
+                    Button('复制密钥').height(32).fontSize(13).onClick(() => { this.copySecret(item); });
+                    Button('重置').height(32).fontSize(13).onClick(() => { this.reset(item); });
+                    Button('删除').height(32).fontSize(13).fontColor($r('app.color.danger_color'))
                       .onClick(() => { this.remove(item); });
                   }
                 }
@@ -96,7 +96,6 @@ struct AppKeyPage {
           }
           .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
         }
-        .refreshing(this.refreshing)
         .onRefresh(() => { this.load(true); });
       }
     }

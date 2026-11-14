@@ -21,7 +21,7 @@ struct HomePage {
   ];
 
   @Builder
-  TabContent() {
+  TabPane() {
     if (this.currentIndex === 0) {
       TaskPage();
     } else if (this.currentIndex === 1) {
@@ -36,22 +36,23 @@ struct HomePage {
   build() {
     Column() {
       Column() {
-        this.TabContent();
+        this.TabPane();
       }.layoutWeight(1).width('100%');
 
       Row() {
         ForEach(this.tabs, (item: TabItem) => {
           Column({ space: 4 }) {
-            Text(item.icon).fontSize(22);
-            Text(item.title).fontSize(11);
+            Text(item.icon).fontSize(22)
+              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_secondary'));
+            Text(item.title).fontSize(11)
+              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_secondary'));
           }
           .layoutWeight(1).height('100%').justifyContent(FlexAlign.Center)
-          .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_secondary'))
           .onClick(() => { this.currentIndex = item.key; });
         });
       }
       .width('100%').height(64).backgroundColor(Color.White)
-      .borderTop({ width: 0.5, color: $r('app.color.divider_color') });
+      .border({ width: { top: 0.5 }, color: { top: $r('app.color.divider_color') } });
     }
     .width('100%').height('100%').backgroundColor($r('app.color.bg_page'));
   }

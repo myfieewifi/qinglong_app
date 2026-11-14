@@ -23,6 +23,7 @@ export class LoginBean {
   lastlogon: number = 0;
   retries: number = 0;
   platform: string = '';
+  twoFactorActivated: boolean = false;
 
   static fromJson(m: JsonMap): LoginBean {
     const b = new LoginBean();
@@ -32,6 +33,7 @@ export class LoginBean {
     b.lastlogon = getNumber(m, 'lastlogon');
     b.retries = getNumber(m, 'retries');
     b.platform = getString(m, 'platform');
+    b.twoFactorActivated = getBool(m, 'twoFactorActivated');
     return b;
   }
 }

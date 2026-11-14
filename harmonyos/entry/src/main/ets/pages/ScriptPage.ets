@@ -60,7 +60,7 @@ struct ScriptPage {
       if (this.loading) {
         LoadingView();
       } else if (this.flat.length === 0) {
-        EmptyView('暂无脚本');
+        EmptyView({ message: '暂无脚本' });
       } else {
         List({ space: 10 }) {
           ForEach(this.flat, (node: ScriptNode) => {

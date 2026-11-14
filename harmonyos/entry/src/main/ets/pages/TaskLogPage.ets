@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { toast } from '../common/components/Toast';
 import { LoadingView, EmptyView } from '../common/components/Common';
@@ -45,7 +45,7 @@ struct TaskLogPage {
       if (this.loading) {
         LoadingView();
       } else if (this.content.length === 0) {
-        EmptyView('暂无日志');
+        EmptyView({ message: '暂无日志' });
       } else {
         Scroll() {
           Text(this.content)

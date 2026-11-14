@@ -1,10 +1,15 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
 import { PrimaryButton } from '../common/components/Common';
 
-const SCOPE_OPTIONS: Array<{ key: string; label: string }> = [
+interface ScopeOption {
+  key: string;
+  label: string;
+}
+
+const SCOPE_OPTIONS: ScopeOption[] = [
   { key: 'crons', label: '定时任务' },
   { key: 'envs', label: '环境变量' },
   { key: 'configs', label: '配置文件' },
@@ -18,7 +23,7 @@ const SCOPE_OPTIONS: Array<{ key: string; label: string }> = [
 @Entry
 @Component
 struct AppKeyEditPage {
-  @State id: string = '';
+  @State keyId: string = '';
   @State isEdit: boolean = false;
   @State name: string = '';
   @State selected: string[] = [];
@@ -30,7 +35,7 @@ struct AppKeyEditPage {
     if (params && params['bean'] !== undefined) {
       const bean = asMap(JSON.parse(params['bean'].toString()) as Object);
       this.isEdit = true;
-      this.id = getString(bean, '_id') || `${getNumber(bean, 'id')}`;
+      this.keyId = getString(bean, '_id') || `${getNumber(bean, 'id')}`;
       this.name = getString(bean, 'name');
       const scopes = bean['scopes'] as Object[];
       if (Array.isArray(scopes)) {
@@ -63,7 +68,7 @@ struct AppKeyEditPage {
       'scopes': this.selected
     };
     if (this.isEdit) {
-      data['_id'] = this.id;
+      data['_id'] = this.keyId;
     }
     const resp = await this.api.saveAppKey(data);
     this.saving = false;
@@ -87,20 +92,18 @@ struct AppKeyEditPage {
             .onChange((v: string) => { this.name = v; });
 
           Text('权限范围').fontSize(14).fontColor($r('app.color.text_secondary'));
-          Flex({ wrap: FlexWrap.Wrap, space: { row: 10, column: 10 } }) {
-            ForEach(SCOPE_OPTIONS, (opt: { key: string; label: string }) => {
-              const active = this.selected.indexOf(opt.key) >= 0;
-              Button(opt.label).size(ButtonSize.Small)
-                .backgroundColor(active ? $r('app.color.brand_color') : Color.White)
-                .fontColor(active ? Color.White : $r('app.color.text_primary'))
+          Flex({ wrap: FlexWrap.Wrap, space: 10 }) {
+            ForEach(SCOPE_OPTIONS, (opt: ScopeOption) => {
+              Button(opt.label).height(32).fontSize(13)
+                .backgroundColor(this.selected.indexOf(opt.key) >= 0 ? $r('app.color.brand_color') : Color.White)
+                .fontColor(this.selected.indexOf(opt.key) >= 0 ? Color.White : $r('app.color.text_primary'))
                 .onClick(() => { this.toggle(opt.key); });
             });
           }
         }.width('100%');
       }.layoutWeight(1).scrollBar(BarState.Auto);
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', enabled: !this.saving })
-        .onTap(() => { this.submit(); });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } });
     }
     .width('100%').height('100%').padding(20)
     .backgroundColor($r('app.color.bg_page'));

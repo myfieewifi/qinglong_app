@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -50,9 +50,9 @@ struct SubscribePage {
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
-        EmptyView('暂无订阅');
+        EmptyView({ message: '暂无订阅' });
       } else {
-        Refresh() {
+        Refresh({ refreshing: $$this.refreshing }) {
           List({ space: 10 }) {
             ForEach(this.list, (item: RawMap) => {
               ListItem() {
@@ -64,8 +64,8 @@ struct SubscribePage {
                   Text(`规则：${getString(item, 'schedule') || getString(item, 'interval_schedule')}`)
                     .fontSize(12).fontColor($r('app.color.text_secondary'));
                   Row({ space: 8 }) {
-                    Button('编辑').size(ButtonSize.Small).onClick(() => { this.edit(item); });
-                    Button('删除').size(ButtonSize.Small).fontColor($r('app.color.danger_color'))
+                    Button('编辑').height(32).fontSize(13).onClick(() => { this.edit(item); });
+                    Button('删除').height(32).fontSize(13).fontColor($r('app.color.danger_color'))
                       .onClick(() => { this.remove(item); });
                   }
                 }
@@ -75,7 +75,6 @@ struct SubscribePage {
           }
           .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
         }
-        .refreshing(this.refreshing)
         .onRefresh(() => { this.load(true); });
       }
     }

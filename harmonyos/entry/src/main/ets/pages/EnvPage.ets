@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { EnvBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
@@ -68,9 +68,9 @@ export struct EnvPage {
       if (this.loading) {
         LoadingView();
       } else if (this.filtered().length === 0) {
-        EmptyView('暂无环境变量');
+        EmptyView({ message: '暂无环境变量' });
       } else {
-        Refresh() {
+        Refresh({ refreshing: $$this.refreshing }) {
           List({ space: 10 }) {
             ForEach(this.filtered(), (e: EnvBean) => {
               ListItem() {
@@ -90,13 +90,13 @@ export struct EnvPage {
                   }.width('100%');
 
                   Row({ space: 8 }) {
-                    Button(e.disabled ? '启用' : '禁用').size(ButtonSize.Small)
+                    Button(e.disabled ? '启用' : '禁用').height(32).fontSize(13)
                       .onClick(() => { this.toggle(e); });
-                    Button('编辑').size(ButtonSize.Small)
+                    Button('编辑').height(32).fontSize(13)
                       .onClick(() => {
                         router.pushUrl({ url: 'pages/EnvEditPage', params: { bean: JSON.stringify(e) } });
                       });
-                    Button('删除').size(ButtonSize.Small).fontColor($r('app.color.danger_color'))
+                    Button('删除').height(32).fontSize(13).fontColor($r('app.color.danger_color'))
                       .onClick(() => { this.remove(e); });
                   }
                 }
@@ -106,7 +106,6 @@ export struct EnvPage {
           }
           .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
         }
-        .refreshing(this.refreshing)
         .onRefresh(() => { this.load(true); });
       }
 

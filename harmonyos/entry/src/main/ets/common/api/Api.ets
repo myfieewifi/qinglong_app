@@ -41,20 +41,25 @@ export class Api {
   // ===== 账号 / 系统 =====
 
   login(host: string, username: string, password: string): Promise<HttpResponse<LoginBean>> {
+    const body: Record<string, Object> = { 'username': username, 'password': password };
     return this.http.request<LoginBean>(http.RequestMethod.POST, Urls.LOGIN, {},
-      { username, password }, beanParser(LoginBean.fromJson), host);
+      body, beanParser(LoginBean.fromJson), host);
   }
 
   loginTwo(host: string, username: string, password: string, code: string):
     Promise<HttpResponse<LoginBean>> {
+    const body: Record<string, Object> =
+      { 'username': username, 'password': password, 'code': code };
     return this.http.request<LoginBean>(http.RequestMethod.PUT, Urls.LOGIN_TWO, {},
-      { username, password, code }, beanParser(LoginBean.fromJson), host);
+      body, beanParser(LoginBean.fromJson), host);
   }
 
   loginByClientId(host: string, clientId: string, secret: string):
     Promise<HttpResponse<LoginBean>> {
+    const query: Record<string, string> =
+      { 'client_id': clientId, 'client_secret': secret };
     return this.http.request<LoginBean>(http.RequestMethod.GET, Urls.LOGIN_BY_CLIENT,
-      { client_id: clientId, client_secret: secret }, null, beanParser(LoginBean.fromJson), host);
+      query, null, beanParser(LoginBean.fromJson), host);
   }
 
   user(): Promise<HttpResponse<UserBean>> {
@@ -66,7 +71,8 @@ export class Api {
   }
 
   updatePassword(username: string, password: string): Promise<HttpResponse<boolean>> {
-    return this.http.put<boolean>(Urls.USER, { username, password }, emptyParser());
+    const body: Record<string, Object> = { 'username': username, 'password': password };
+    return this.http.put<boolean>(Urls.USER, body, emptyParser());
   }
 
   checkUpdate(): Promise<HttpResponse<RawMap>> {
@@ -76,8 +82,9 @@ export class Api {
   // ===== 定时任务 =====
 
   crons(): Promise<HttpResponse<TaskBean[]>> {
+    const query: Record<string, string> = { 'searchValue': '' };
     return this.http.get<TaskBean[]>(Urls.crons(this.secret()),
-      { searchValue: '' }, listParser(TaskBean.fromJson));
+      query, listParser(TaskBean.fromJson));
   }
 
   saveTask(payload: Record<string, Object>): Promise<HttpResponse<boolean>> {
@@ -85,31 +92,38 @@ export class Api {
   }
 
   deleteCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.del<boolean>(Urls.crons(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.del<boolean>(Urls.crons(this.secret()), body, emptyParser());
   }
 
   runCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronRun(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronRun(this.secret()), body, emptyParser());
   }
 
   stopCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronStop(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronStop(this.secret()), body, emptyParser());
   }
 
   pinCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronPin(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronPin(this.secret()), body, emptyParser());
   }
 
   unpinCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronUnpin(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronUnpin(this.secret()), body, emptyParser());
   }
 
   enableCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronEnable(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronEnable(this.secret()), body, emptyParser());
   }
 
   disableCrons(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.cronDisable(this.secret()), { crons: ids }, emptyParser());
+    const body: Record<string, Object> = { 'crons': ids };
+    return this.http.post<boolean>(Urls.cronDisable(this.secret()), body, emptyParser());
   }
 
   cronLog(id: string): Promise<HttpResponse<string>> {
@@ -119,7 +133,8 @@ export class Api {
   // ===== 环境变量 =====
 
   envs(search: string): Promise<HttpResponse<EnvBean[]>> {
-    return this.http.get<EnvBean[]>(Urls.envs(this.secret()), { searchValue: search },
+    const query: Record<string, string> = { 'searchValue': search };
+    return this.http.get<EnvBean[]>(Urls.envs(this.secret()), query,
       listParser(EnvBean.fromJson));
   }
 
@@ -128,19 +143,23 @@ export class Api {
   }
 
   deleteEnvs(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.del<boolean>(Urls.envs(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.del<boolean>(Urls.envs(this.secret()), body, emptyParser());
   }
 
   enableEnvs(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.envEnable(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.post<boolean>(Urls.envEnable(this.secret()), body, emptyParser());
   }
 
   disableEnvs(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.envDisable(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.post<boolean>(Urls.envDisable(this.secret()), body, emptyParser());
   }
 
   moveEnv(id: string, from: number, to: number): Promise<HttpResponse<boolean>> {
-    return this.http.put<boolean>(Urls.envMove(id, this.secret()), { from, to }, emptyParser());
+    const body: Record<string, Object> = { 'from': from, 'to': to };
+    return this.http.put<boolean>(Urls.envMove(id, this.secret()), body, emptyParser());
   }
 
   // ===== 配置文件 =====
@@ -155,7 +174,8 @@ export class Api {
   }
 
   saveFile(name: string, content: string): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.configSave(this.secret()), { name, content }, emptyParser());
+    const body: Record<string, Object> = { 'name': name, 'content': content };
+    return this.http.post<boolean>(Urls.configSave(this.secret()), body, emptyParser());
   }
 
   // ===== 订阅 =====
@@ -174,34 +194,41 @@ export class Api {
   }
 
   runSubscribes(ids: number[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.subscribeRun(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.post<boolean>(Urls.subscribeRun(this.secret()), body, emptyParser());
   }
 
   stopSubscribes(ids: number[]): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.subscribeStop(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.post<boolean>(Urls.subscribeStop(this.secret()), body, emptyParser());
   }
 
   enableSubscribe(id: number): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.subscribeEnable(this.secret()), { id }, emptyParser());
+    const body: Record<string, Object> = { 'id': id };
+    return this.http.post<boolean>(Urls.subscribeEnable(this.secret()), body, emptyParser());
   }
 
   disableSubscribe(id: number): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.subscribeDisable(this.secret()), { id }, emptyParser());
+    const body: Record<string, Object> = { 'id': id };
+    return this.http.post<boolean>(Urls.subscribeDisable(this.secret()), body, emptyParser());
   }
 
   // ===== 依赖 =====
 
   dependencies(type: string): Promise<HttpResponse<DependencyBean[]>> {
-    return this.http.get<DependencyBean[]>(Urls.dependencies(this.secret()), { type },
+    const query: Record<string, string> = { 'type': type };
+    return this.http.get<DependencyBean[]>(Urls.dependencies(this.secret()), query,
       listParser(DependencyBean.fromJson));
   }
 
   addDependency(list: Record<string, Object>[]): Promise<HttpResponse<string>> {
-    return this.http.post<string>(Urls.dependencies(this.secret()), { list }, stringParser());
+    const body: Record<string, Object> = { 'list': list };
+    return this.http.post<string>(Urls.dependencies(this.secret()), body, stringParser());
   }
 
   reinstallDependency(id: string): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.depReinstall(this.secret()), { id }, emptyParser());
+    const body: Record<string, Object> = { 'id': id };
+    return this.http.post<boolean>(Urls.depReinstall(this.secret()), body, emptyParser());
   }
 
   dependencyLog(id: string): Promise<HttpResponse<string>> {
@@ -209,7 +236,8 @@ export class Api {
   }
 
   deleteDependencies(sIds: string[], ids: number[]): Promise<HttpResponse<boolean>> {
-    return this.http.del<boolean>(Urls.dependencies(this.secret()), { sIds, ids }, emptyParser());
+    const body: Record<string, Object> = { 'sIds': sIds, 'ids': ids };
+    return this.http.del<boolean>(Urls.dependencies(this.secret()), body, emptyParser());
   }
 
   // ===== 脚本 =====
@@ -226,16 +254,18 @@ export class Api {
   }
 
   saveScript(name: string, path: string, content: string): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.scripts(this.secret()), { name, path, content }, emptyParser());
+    const body: Record<string, Object> = { 'name': name, 'path': path, 'content': content };
+    return this.http.post<boolean>(Urls.scripts(this.secret()), body, emptyParser());
   }
 
   deleteScript(name: string, path: string): Promise<HttpResponse<boolean>> {
-    return this.http.del<boolean>(Urls.scripts(this.secret()), { name, path }, emptyParser());
+    const body: Record<string, Object> = { 'name': name, 'path': path };
+    return this.http.del<boolean>(Urls.scripts(this.secret()), body, emptyParser());
   }
 
   addScriptFolder(name: string, path: string): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.scripts(this.secret()), { name, path, isFolder: true },
-      emptyParser());
+    const body: Record<string, Object> = { 'name': name, 'path': path, 'isFolder': true };
+    return this.http.post<boolean>(Urls.scripts(this.secret()), body, emptyParser());
   }
 
   // ===== 日志 =====
@@ -267,7 +297,8 @@ export class Api {
   }
 
   deleteAppKeys(ids: string[]): Promise<HttpResponse<boolean>> {
-    return this.http.del<boolean>(Urls.appKeys(this.secret()), { ids }, emptyParser());
+    const body: Record<string, Object> = { 'ids': ids };
+    return this.http.del<boolean>(Urls.appKeys(this.secret()), body, emptyParser());
   }
 
   resetAppKey(id: string): Promise<HttpResponse<boolean>> {

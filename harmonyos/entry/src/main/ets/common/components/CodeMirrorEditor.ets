@@ -1,4 +1,4 @@
-import { webview } from '@ohos.web.webview';
+import webview from '@ohos.web.webview';
 
 /**
  * 基于 WebView 的 CodeMirror 代码编辑器封装（对齐原 Flutter 端 WebView 编辑器方案）。
@@ -28,8 +28,8 @@ export struct CodeMirrorEditor {
 
   async getCode(): Promise<string> {
     try {
-      const res = await this.controller.runJavaScriptReturningResult('getCode()');
-      return res ? res.toString() : this.code;
+      const res: Object = await this.controller.runJavaScriptReturningResult('getCode()');
+      return WebCodeBridge.unwrapResult(res, this.code);
     } catch (e) {
       return this.code;
     }
@@ -59,5 +59,23 @@ export struct CodeMirrorEditor {
         this.controller.runJavaScript(`setTheme(${this.jsArg(this.theme)})`);
         this.controller.runJavaScript(`setCode(${this.jsArg(this.code)})`);
       });
+  }
+}
+
+/**
+ * runJavaScriptReturningResult 的结果处理工具：
+ * JS 返回字符串时结果会带 JSON 引号，需要还原成原文。
+ */
+export class WebCodeBridge {
+  static unwrapResult(res: Object, fallback: string): string {
+    const raw = res.toString();
+    if (raw.length >= 2 && raw.startsWith('"') && raw.endsWith('"')) {
+      try {
+        return JSON.parse(raw) as string;
+      } catch (e) {
+        return raw.slice(1, raw.length - 1);
+      }
+    }
+    return raw.length > 0 ? raw : fallback;
   }
 }

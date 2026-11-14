@@ -1,4 +1,4 @@
-import { router } from '@ohos.router';
+import router from '@ohos.router';
 import { AppStore } from '../common/store/AppStore';
 import { toast } from '../common/components/Toast';
 import { Cell } from '../common/components/Common';
