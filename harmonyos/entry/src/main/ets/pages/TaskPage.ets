@@ -114,7 +114,7 @@ export struct TaskPage {
           }
           .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
         }
-        .onRefresh(() => { this.load(true); });
+        .onRefreshing(() => { this.load(true); });
       }
 
       Button('+ 新增任务')

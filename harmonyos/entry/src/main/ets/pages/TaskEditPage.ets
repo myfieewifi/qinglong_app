@@ -40,7 +40,7 @@ struct TaskEditPage {
     }
     let command = this.command;
     try {
-      const r: Object = await this.webCtrl.runJavaScriptReturningResult('getCode()');
+      const r: Object = await this.webCtrl.runJavaScript('getCode()');
       command = WebCodeBridge.unwrapResult(r, this.command);
     } catch (e) {
       // 兜底沿用本地缓存

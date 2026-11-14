@@ -40,7 +40,7 @@ struct ConfigEditorPage {
     this.saving = true;
     let text = this.content;
     try {
-      const r: Object = await this.webCtrl.runJavaScriptReturningResult('getCode()');
+      const r: Object = await this.webCtrl.runJavaScript('getCode()');
       text = WebCodeBridge.unwrapResult(r, this.content);
     } catch (e) {
       // 兜底：沿用本地缓存内容

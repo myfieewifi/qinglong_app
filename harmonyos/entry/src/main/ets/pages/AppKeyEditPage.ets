@@ -92,9 +92,9 @@ struct AppKeyEditPage {
             .onChange((v: string) => { this.name = v; });
 
           Text('权限范围').fontSize(14).fontColor($r('app.color.text_secondary'));
-          Flex({ wrap: FlexWrap.Wrap, space: 10 }) {
+          Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
             ForEach(SCOPE_OPTIONS, (opt: ScopeOption) => {
-              Button(opt.label).height(32).fontSize(13)
+              Button(opt.label).height(32).fontSize(13).margin(5)
                 .backgroundColor(this.selected.indexOf(opt.key) >= 0 ? $r('app.color.brand_color') : Color.White)
                 .fontColor(this.selected.indexOf(opt.key) >= 0 ? Color.White : $r('app.color.text_primary'))
                 .onClick(() => { this.toggle(opt.key); });

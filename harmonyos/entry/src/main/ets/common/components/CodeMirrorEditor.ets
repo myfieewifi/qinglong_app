@@ -28,7 +28,7 @@ export struct CodeMirrorEditor {
 
   async getCode(): Promise<string> {
     try {
-      const res: Object = await this.controller.runJavaScriptReturningResult('getCode()');
+      const res: Object = await this.controller.runJavaScript('getCode()');
       return WebCodeBridge.unwrapResult(res, this.code);
     } catch (e) {
       return this.code;

@@ -302,6 +302,7 @@ export class Api {
   }
 
   resetAppKey(id: string): Promise<HttpResponse<boolean>> {
-    return this.http.post<boolean>(Urls.appKeyReset(id), {}, emptyParser());
+    const body: Record<string, Object> = {};
+    return this.http.post<boolean>(Urls.appKeyReset(id), body, emptyParser());
   }
 }
