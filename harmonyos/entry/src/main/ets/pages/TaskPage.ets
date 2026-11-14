@@ -15,7 +15,7 @@ export struct TaskPage {
   @State loading: boolean = false;
   @State refreshing: boolean = false;
   @State search: string = '';
-  @State tabIndex: number = 0;
+  @State segIndex: number = 0;
   private tabs: TabEntry[] = [
     { title: '全部' },
     { title: '运行中' },
@@ -41,13 +41,13 @@ export struct TaskPage {
   }
 
   private inTab(t: TaskBean): boolean {
-    if (this.tabIndex === 1) {
+    if (this.segIndex === 1) {
       return t.running;
     }
-    if (this.tabIndex === 2) {
+    if (this.segIndex === 2) {
       return !t.running && t.lastExecutionTime === 0;
     }
-    if (this.tabIndex === 3) {
+    if (this.segIndex === 3) {
       return t.isDisabled === 1;
     }
     return true;
@@ -162,11 +162,11 @@ export struct TaskPage {
           Column() {
             Text(item.title)
               .fontSize(14)
-              .fontColor(this.tabIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : '#999999');
+              .fontColor(this.segIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : '#999999');
           }
           .layoutWeight(1).height(40).justifyContent(FlexAlign.Center)
-          .border({ width: { bottom: 2 }, color: { bottom: this.tabIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : Color.Transparent } })
-          .onClick(() => { this.tabIndex = this.tabs.indexOf(item); });
+          .border({ width: { bottom: 2 }, color: { bottom: this.segIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : Color.Transparent } })
+          .onClick(() => { this.segIndex = this.tabs.indexOf(item); });
         }, (item: TabEntry) => item.title);
       }
       .width('100%')

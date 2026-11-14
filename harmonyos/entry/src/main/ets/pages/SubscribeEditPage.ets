@@ -228,6 +228,8 @@ struct SubscribeEditPage {
 
       PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } })
         .margin({ left: 20, right: 20, bottom: 20 });
+      }
+      .layoutWeight(1);
     }
     .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
