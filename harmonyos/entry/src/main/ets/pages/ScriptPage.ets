@@ -2,6 +2,7 @@ import { Api } from '../common/api/Api';
 import { ScriptNode } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
 import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
+import { AppIcon } from '../common/components/Icons';
 
 @Entry
 @Component
@@ -63,9 +64,14 @@ struct ScriptPage {
           ForEach(this.flat, (node: ScriptNode) => {
             ListItem() {
               Row() {
-                Text(node.children.length > 0 ? '📁' : '📜').fontSize(18).margin({ right: 10 });
+                AppIcon({
+                  name: node.children.length > 0 ? 'config' : 'script',
+                  size: 20,
+                  iconColor: $r('app.color.brand_color')
+                });
                 Text(node.title).fontSize(15).layoutWeight(1)
-                  .fontColor($r('app.color.text_primary')).maxLines(1);
+                  .fontColor($r('app.color.text_primary')).maxLines(1)
+                  .margin({ left: 10 });
               }
               .width('100%').padding({ left: 15, right: 15, top: 13, bottom: 13 })
               .backgroundColor(Color.White)

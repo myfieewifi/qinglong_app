@@ -2,12 +2,8 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { TaskBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView, PageBar, RunningBadge, StatusBadge } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar, RunningBadge, StatusBadge, SegmentControl, SearchCapsule } from '../common/components/Common';
 import { formatTime } from '../common/utils/DateFmt';
-
-interface TabEntry {
-  title: string;
-}
 
 @Component
 export struct TaskPage {
@@ -16,12 +12,7 @@ export struct TaskPage {
   @State refreshing: boolean = false;
   @State search: string = '';
   @State segIndex: number = 0;
-  private tabs: TabEntry[] = [
-    { title: '全部' },
-    { title: '运行中' },
-    { title: '从未运行' },
-    { title: '已禁用' }
-  ];
+  private tabs: string[] = ['全部', '运行中', '从未运行', '已禁用'];
   private api: Api = new Api();
 
   aboutToAppear(): void {
@@ -92,16 +83,16 @@ export struct TaskPage {
   TaskCell(t: TaskBean) {
     Column({ space: 5 }) {
       Row() {
-        Text(t.name).fontSize(17).fontColor($r('app.color.text_primary'))
+        Text(t.name).fontSize(16).fontWeight(FontWeight.Medium)
+          .fontColor($r('app.color.text_primary'))
           .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
-          .constraintSize({ maxWidth: '60%' });
+          .constraintSize({ maxWidth: '55%' });
         if (t.running) {
           RunningBadge().margin({ left: 7 });
         }
         if (t.isDisabled === 1) {
-          Column() {
-            StatusBadge({ title: '已禁用', badgeColor: '#FB5858', lightBg: '#1AFB5858' });
-          }.margin({ left: 7 });
+          StatusBadge({ title: '已禁用', badgeColor: '#FB5858', lightBg: '#00FB5858' })
+            .margin({ left: 7 });
         }
         Blank().layoutWeight(1);
         Text(t.lastExecutionTime === 0 ? '-' : formatTime(t.lastExecutionTime))
@@ -109,10 +100,10 @@ export struct TaskPage {
       }
       .width('100%');
 
-      Text(t.schedule).fontSize(14).fontColor($r('app.color.text_desc'))
+      Text(t.schedule).fontSize(13).fontColor($r('app.color.text_secondary'))
         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%');
 
-      Text(t.command).fontSize(14).fontColor($r('app.color.text_desc'))
+      Text(t.command).fontSize(13).fontColor($r('app.color.text_desc'))
         .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%');
 
       Row({ space: 20 }) {
@@ -135,42 +126,38 @@ export struct TaskPage {
       .padding({ top: 2 });
     }
     .width('100%')
-    .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+    .padding({ left: 15, right: 15, top: 12, bottom: 12 })
     .backgroundColor(t.isPinned === 1 ? '#F2FBF5' : Color.White);
   }
 
   build() {
     Column() {
-      PageBar({ title: '定时任务' });
+      PageBar({
+        title: '定时任务',
+        actionIcon: 'plus',
+        onAction: () => { router.pushUrl({ url: 'pages/TaskEditPage' }).catch(() => {}); }
+      });
 
-      // 搜索区：Flutter SearchCell —— 白底圆角输入框浮在浅灰底上
+      // 搜索胶囊：白底圆角浮在页面浅灰底上
       Column() {
-        TextInput({ placeholder: '搜索', text: this.search })
-          .height(36).borderRadius(10).backgroundColor(Color.White)
-          .padding({ left: 12, right: 12 })
-          .placeholderColor($r('app.color.text_desc')).placeholderFont({ size: 14 })
-          .fontSize(15).fontColor($r('app.color.text_primary'))
-          .onChange((v: string) => { this.search = v; });
+        SearchCapsule({
+          search: this.search,
+          onSearch: (v: string) => { this.search = v; }
+        });
       }
       .width('100%')
-      .backgroundColor('#F1F1F1')
-      .padding({ left: 15, right: 15, top: 10, bottom: 10 });
+      .padding({ left: 15, right: 15, top: 8, bottom: 8 });
 
-      // 分段筛选：下划线指示器（对齐 Flutter TabBar）
-      Row() {
-        ForEach(this.tabs, (item: TabEntry) => {
-          Column() {
-            Text(item.title)
-              .fontSize(14)
-              .fontColor(this.segIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : '#999999');
-          }
-          .layoutWeight(1).height(40).justifyContent(FlexAlign.Center)
-          .border({ width: { bottom: 2 }, color: { bottom: this.segIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : Color.Transparent } })
-          .onClick(() => { this.segIndex = this.tabs.indexOf(item); });
-        }, (item: TabEntry) => item.title);
+      // 分段筛选：iOS 式灰底白色选中块
+      Column() {
+        SegmentControl({
+          titles: this.tabs,
+          segIndex: this.segIndex,
+          onChange: (idx: number) => { this.segIndex = idx; }
+        });
       }
       .width('100%')
-      .backgroundColor($r('app.color.tabbar_bg'));
+      .padding({ left: 12, right: 12, bottom: 8 });
 
       if (this.loading) {
         LoadingView();
@@ -196,13 +183,6 @@ export struct TaskPage {
         }
         .onRefreshing(() => { this.load(true); });
       }
-
-      Button('+ 新增任务')
-        .width('100%').height(46).margin({ left: 15, right: 15, bottom: 10, top: 8 })
-        .fontSize(15)
-        .backgroundColor($r('app.color.brand_color'))
-        .borderRadius(20)
-        .onClick(() => { router.pushUrl({ url: 'pages/TaskEditPage' }).catch(() => {}); });
     }
     .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));

@@ -2,6 +2,7 @@ import { TaskPage } from './TaskPage';
 import { EnvPage } from './EnvPage';
 import { ConfigPage } from './ConfigPage';
 import { MinePage } from './MinePage';
+import { AppIcon } from '../common/components/Icons';
 
 interface TabItem {
   key: number;
@@ -14,10 +15,10 @@ interface TabItem {
 struct HomePage {
   @State currentIndex: number = 0;
   private tabs: TabItem[] = [
-    { key: 0, title: '定时任务', icon: '⏱' },
-    { key: 1, title: '环境变量', icon: '🔤' },
-    { key: 2, title: '配置文件', icon: '📁' },
-    { key: 3, title: '我的', icon: '👤' }
+    { key: 0, title: '定时任务', icon: 'task' },
+    { key: 1, title: '环境变量', icon: 'env' },
+    { key: 2, title: '配置文件', icon: 'config' },
+    { key: 3, title: '我的', icon: 'mine' }
   ];
 
   @Builder
@@ -41,15 +42,19 @@ struct HomePage {
 
       Row() {
         ForEach(this.tabs, (item: TabItem) => {
-          Column({ space: 3 }) {
-            Text(item.icon).fontSize(21)
-              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_desc'));
-            Text(item.title).fontSize(12)
-              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_desc'));
+          Column({ space: 2 }) {
+            AppIcon({
+              name: item.icon,
+              size: 23,
+              iconColor: this.currentIndex === item.key ?
+                $r('app.color.brand_color') : '#9A9A9A'
+            });
+            Text(item.title).fontSize(11)
+              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : '#9A9A9A');
           }
           .layoutWeight(1).height('100%').justifyContent(FlexAlign.Center)
           .onClick(() => { this.currentIndex = item.key; });
-        });
+        }, (item: TabItem) => `${item.key}`);
       }
       .width('100%').height(58).backgroundColor($r('app.color.nav_bg'))
       .border({ width: { top: 0.5 }, color: { top: $r('app.color.divider_color') } });

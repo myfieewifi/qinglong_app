@@ -4,6 +4,7 @@ import { HttpResponse, LoginBean } from '../common/model/Models';
 import { AppStore, AccountInfo } from '../common/store/AppStore';
 import { toast } from '../common/components/Toast';
 import { PrimaryButton } from '../common/components/Common';
+import { LogoMark } from '../common/components/Icons';
 import { Logger } from '../common/utils/Logger';
 
 @Entry
@@ -75,71 +76,72 @@ struct LoginPage {
     }
   }
 
+  /** 下划线式输入行：左标签 + 右输入框。 */
+  @Builder
+  FieldRow(label: string, ph: string, isSecret: boolean, idx: number) {
+    Row() {
+      Text(label).fontSize(15).fontColor($r('app.color.text_secondary'))
+        .width(56);
+      TextInput({ placeholder: ph, text: idx === 0 ? this.host :
+        (idx === 1 ? this.username : (idx === 2 ? this.password : this.twoFactor)) })
+        .backgroundColor(Color.Transparent)
+        .layoutWeight(1).height(46)
+        .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+        .fontSize(15).fontColor($r('app.color.text_primary'))
+        .type(isSecret ? InputType.Password : InputType.Normal)
+        .onChange((v: string) => {
+          if (idx === 0) { this.host = v; }
+          else if (idx === 1) { this.username = v; }
+          else if (idx === 2) { this.password = v; }
+          else { this.twoFactor = v; }
+        });
+    }
+    .width('100%').height(50)
+    .border({ width: { bottom: 1 }, color: { bottom: '#E7E7E7' } });
+  }
+
   build() {
     Column() {
-      // 渐变头部（对齐 Flutter 亮色主题 App Bar 渐变）
-      Column({ space: 10 }) {
-        Text('青龙客户端')
-          .fontSize(26).fontWeight(FontWeight.Medium)
-          .fontColor(Color.White);
+      // 顶部：左标题 + 右 Logo（对齐安卓端截图）
+      Row() {
+        Text('账号登录')
+          .fontSize(24).fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.text_primary'));
 
-        Text('连接你的青龙面板')
-          .fontSize(14).fontColor('#DFF5E6');
+        Blank().layoutWeight(1);
+
+        LogoMark({ size: 46, markRadius: 10 });
       }
-      .width('100%').padding({ top: 70, bottom: 46 })
-      .alignItems(HorizontalAlign.Center)
-      .linearGradient({
-        angle: 90,
-        colors: [[$r('app.color.gradient_start'), 0], [$r('app.color.gradient_end'), 1]]
-      });
+      .width('100%')
+      .padding({ left: 20, right: 20, top: 64, bottom: 30 });
 
-      Column({ space: 16 }) {
-        TextInput({ placeholder: '面板地址，如 http://192.168.1.1:5700', text: this.host })
-          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
-          .backgroundColor(Color.White)
-          .border({ width: 1, color: '#E4E4E4' })
-          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
-          .fontSize(14).fontColor($r('app.color.text_primary'))
-          .onChange((v: string) => { this.host = v; });
-
-        TextInput({ placeholder: '用户名', text: this.username })
-          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
-          .backgroundColor(Color.White)
-          .border({ width: 1, color: '#E4E4E4' })
-          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
-          .fontSize(14).fontColor($r('app.color.text_primary'))
-          .onChange((v: string) => { this.username = v; });
-
-        TextInput({ placeholder: '密码', text: this.password })
-          .type(InputType.Password)
-          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
-          .backgroundColor(Color.White)
-          .border({ width: 1, color: '#E4E4E4' })
-          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
-          .fontSize(14).fontColor($r('app.color.text_primary'))
-          .onChange((v: string) => { this.password = v; });
+      Column({ space: 6 }) {
+        this.FieldRow('域名', '如 http://192.168.1.1:5700', false, 0);
+        this.FieldRow('账户', '请输入用户名', false, 1);
+        this.FieldRow('密码', '请输入密码', true, 2);
 
         if (this.needTwoFactor) {
-          TextInput({ placeholder: '两步验证码', text: this.twoFactor })
-            .height(44).borderRadius(4).padding({ left: 10, right: 10 })
-            .backgroundColor(Color.White)
-            .border({ width: 1, color: '#E4E4E4' })
-            .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
-            .fontSize(14).fontColor($r('app.color.text_primary'))
-            .onChange((v: string) => { this.twoFactor = v; });
+          this.FieldRow('验证码', '两步验证码', false, 3);
         }
 
-        PrimaryButton({ label: this.loading ? '登录中…' : '登录', btnEnabled: !this.loading, onTap: () => { this.submit(); } });
+        PrimaryButton({
+          label: this.loading ? '登录中…' : '登录',
+          btnEnabled: !this.loading,
+          onTap: () => { this.submit(); }
+        })
+          .margin({ top: 30 });
 
         Text('支持账号密码登录；如开启两步验证，登录后补充验证码。')
           .fontSize(12).fontColor($r('app.color.text_desc'))
-          .textAlign(TextAlign.Center);
+          .textAlign(TextAlign.Center)
+          .margin({ top: 6 });
       }
-      .width('100%').padding({ left: 20, right: 20, top: 26 })
-      .alignItems(HorizontalAlign.Center)
+      .width('100%')
+      .padding({ left: 20, right: 20 })
+      .alignItems(HorizontalAlign.Start)
       .layoutWeight(1);
     }
     .width('100%').height('100%')
-    .backgroundColor($r('app.color.bg_page'));
+    .backgroundColor(Color.White);
   }
 }

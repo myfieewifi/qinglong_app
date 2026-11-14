@@ -1,42 +1,110 @@
-/** 通用 UI 组件：渐变导航栏、加载态、空态、主按钮、单元格、状态角标。对齐 Flutter 版青龙视觉。 */
+/** 通用 UI 组件：浅灰导航栏、iOS 分段选择器、搜索胶囊、加载态、空态、渐变主按钮、单元格、状态角标。对齐安卓端截图视觉。 */
 import router from '@ohos.router';
+import { AppIcon } from './Icons';
 
-/** 顶部导航栏：亮色主题下为 #5DD16F→#099657 渐变，白字 17，左右操作位。 */
+/** 顶部导航栏：浅灰底 #F2F2F2，黑色粗体居中标题 17，左侧绿色返回箭头，右侧绿色文字/图标操作。 */
 @Component
 export struct PageBar {
   @State title: string = '';
   @State showBack: boolean = false;
   @State actionTitle: string = '';
+  @State actionIcon: string = '';
   onAction: () => void = () => {};
 
   build() {
     Row() {
       Row() {
         if (this.showBack) {
-          Text('‹').fontSize(26).fontColor(Color.White)
-            .onClick(() => { router.back(); });
+          AppIcon({ name: 'back', size: 22, iconColor: $r('app.color.brand_color'),
+            onTap: () => { router.back(); } });
         }
       }
-      .width(44).height('100%').justifyContent(FlexAlign.Center);
+      .width(48).height('100%').justifyContent(FlexAlign.Center);
 
       Text(this.title)
-        .fontSize(17).fontWeight(FontWeight.Medium)
-        .fontColor(Color.White).maxLines(1).textAlign(TextAlign.Center)
+        .fontSize(17).fontWeight(FontWeight.Bold)
+        .fontColor($r('app.color.text_primary'))
+        .maxLines(1).textAlign(TextAlign.Center)
         .layoutWeight(1);
 
       Row() {
         if (this.actionTitle.length > 0) {
-          Text(this.actionTitle).fontSize(15).fontColor(Color.White)
+          Text(this.actionTitle).fontSize(16).fontColor($r('app.color.brand_color'))
             .onClick(() => { this.onAction(); });
+        } else if (this.actionIcon.length > 0) {
+          AppIcon({ name: this.actionIcon, size: 20, iconColor: $r('app.color.brand_color'),
+            onTap: () => { this.onAction(); } });
         }
       }
-      .width(56).height('100%').justifyContent(FlexAlign.End).padding({ right: 14 });
+      .width(48).height('100%').justifyContent(FlexAlign.Center);
     }
-    .width('100%').height(50)
-    .linearGradient({
-      angle: 90,
-      colors: [[$r('app.color.gradient_start'), 0], [$r('app.color.gradient_end'), 1]]
-    });
+    .width('100%').height(52)
+    .backgroundColor($r('app.color.bar_bg'));
+  }
+}
+
+/** iOS 式分段选择器：灰色圆角容器 + 白色圆角选中块 + 黑字。 */
+@Component
+export struct SegmentControl {
+  @State titles: string[] = [];
+  @Prop segIndex: number = 0;
+  onChange: (idx: number) => void = (idx: number) => {};
+
+  build() {
+    Row() {
+      ForEach(this.titles, (t: string, idx: number) => {
+        Column() {
+          if (this.segIndex === idx) {
+            Column() {
+              Text(t).fontSize(13).fontWeight(FontWeight.Medium)
+                .fontColor($r('app.color.text_primary')).maxLines(1);
+            }
+            .width('100%').height('100%').justifyContent(FlexAlign.Center)
+            .backgroundColor(Color.White)
+            .borderRadius(7)
+            .shadow({ radius: 3, color: '#14000000', offsetY: 1 });
+          } else {
+            Column() {
+              Text(t).fontSize(13).fontColor('#333333').maxLines(1);
+            }
+            .width('100%').height('100%').justifyContent(FlexAlign.Center);
+          }
+        }
+        .layoutWeight(1).height('100%')
+        .onClick(() => { this.onChange(idx); });
+      }, (t: string) => t);
+    }
+    .width('100%').height(32)
+    .padding(2)
+    .backgroundColor($r('app.color.segment_bg'))
+    .borderRadius(8);
+  }
+}
+
+/** 灰底白色圆角胶囊搜索框：placeholder 居中带放大镜。 */
+@Component
+export struct SearchCapsule {
+  @State search: string = '';
+  @State hint: string = '搜索';
+  onSearch: (v: string) => void = (v: string) => {};
+
+  build() {
+    Stack({ alignContent: Alignment.Center }) {
+      TextInput({ text: this.search })
+        .height(34).borderRadius(17).backgroundColor(Color.White)
+        .padding({ left: 14, right: 14 })
+        .fontSize(14).fontColor($r('app.color.text_primary'))
+        .onChange((v: string) => { this.search = v; this.onSearch(v); });
+
+      if (this.search.length === 0) {
+        Row({ space: 5 }) {
+          AppIcon({ name: 'search', size: 14, iconColor: '#B9B9B9' });
+          Text(this.hint).fontSize(14).fontColor('#B9B9B9');
+        }
+        .hitTestBehavior(HitTestMode.Transparent);
+      }
+    }
+    .width('100%').height(34);
   }
 }
 
@@ -65,6 +133,7 @@ export struct EmptyView {
   }
 }
 
+/** 主按钮：绿色渐变胶囊（对齐安卓端登录/退出按钮）。 */
 @Component
 export struct PrimaryButton {
   @State label: string = '确定';
@@ -75,8 +144,12 @@ export struct PrimaryButton {
     Button(this.label)
       .width('100%').height(46)
       .fontSize(16).fontColor(Color.White)
-      .backgroundColor(this.btnEnabled ? $r('app.color.brand_color') : $r('app.color.btn_disabled'))
-      .borderRadius(20)
+      .borderRadius(23)
+      .linearGradient({
+        angle: 90,
+        colors: [[$r('app.color.gradient_start'), 0], [$r('app.color.gradient_end'), 1]]
+      })
+      .opacity(this.btnEnabled ? 1 : 0.5)
       .onClick(() => {
         if (this.btnEnabled) {
           this.onTap();
@@ -105,7 +178,7 @@ export struct Cell {
       }.alignItems(HorizontalAlign.Start).layoutWeight(1);
 
       if (this.showArrow) {
-        Text('›').fontSize(22).fontColor($r('app.color.text_desc')).margin({ left: 8 });
+        AppIcon({ name: 'chev', size: 16, iconColor: '#C8C8C8' }).margin({ left: 8 });
       }
     }
     .width('100%').padding({ left: 15, right: 15, top: 13, bottom: 13 })
@@ -129,19 +202,19 @@ export struct RunningBadge {
   }
 }
 
-/** 彩色文字角标（已禁用/已启用等）。 */
+/** 描边文字角标（已启用/已禁用等）：彩字 + 同色细描边，圆角 4。 */
 @Component
 export struct StatusBadge {
   @State title: string = '';
   @State badgeColor: ResourceStr = '#FB5858';
-  @State lightBg: ResourceStr = '#1AFB5858';
+  @State lightBg: ResourceStr = '#00FB5858';
 
   build() {
     Text(this.title)
-      .fontSize(10).fontColor(this.badgeColor)
-      .padding({ left: 4, right: 4, top: 2, bottom: 2 })
+      .fontSize(11).fontColor(this.badgeColor)
+      .padding({ left: 5, right: 5, top: 2, bottom: 2 })
       .backgroundColor(this.lightBg)
-      .borderRadius(2)
+      .borderRadius(4)
       .border({ width: 1, color: this.badgeColor });
   }
 }

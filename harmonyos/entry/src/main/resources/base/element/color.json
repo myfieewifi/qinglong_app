@@ -15,6 +15,8 @@
     { "name": "tabbar_bg", "value": "#F7F7F7" },
     { "name": "segmented_uncheck", "value": "#F0F0F0" },
     { "name": "nav_bg", "value": "#F9F9F9" },
+    { "name": "bar_bg", "value": "#F2F2F2" },
+    { "name": "segment_bg", "value": "#E9E9E9" },
     { "name": "btn_disabled", "value": "#9ACFA9" },
     { "name": "danger_color", "value": "#FB5858" },
     { "name": "success_color", "value": "#20B54F" }
