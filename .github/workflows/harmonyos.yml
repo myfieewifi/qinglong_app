@@ -61,13 +61,12 @@ jobs:
         if: failure()
         working-directory: harmonyos
         run: |
+          grep -A2 -iE "ERROR" build_output.log | grep -viE "WARN|warning" > err_ctx.txt || true
           {
-            echo "### ArkTS compile errors"
-            grep -B1 -A3 "ArkTS:ERROR" build_output.log | head -n 120
-            echo "### hvigor ERROR tail"
-            grep -E "ERROR" build_output.log | grep -v "WARN" | tail -n 40
+            echo "### Compile error context (first 120 lines)"
+            head -n 120 err_ctx.txt
           } >> "$GITHUB_STEP_SUMMARY" || true
-          grep "ArkTS:ERROR" build_output.log | head -n 8 | while IFS= read -r line; do
+          head -n 10 err_ctx.txt | while IFS= read -r line; do
             echo "::error::${line:0:400}"
           done
           exit 1
