@@ -56,12 +56,18 @@ jobs:
           set -o pipefail
           hvigorw assembleHap --mode module -p product=default -p buildMode=release --no-daemon --stacktrace 2>&1 | tee build_output.log
 
-      # 编译失败时把 ArkTS 错误行输出为 GHA 标注，便于匿名读取出错位置
+      # 编译失败时把 ArkTS 错误行输出为 GHA 标注与 Step Summary，便于读取出错位置
       - name: Surface compile errors
         if: failure()
         working-directory: harmonyos
         run: |
-          grep -E "ERROR|ArkTS:Compile|\.ets:" build_output.log | head -n 60 | while IFS= read -r line; do
+          {
+            echo "### ArkTS compile errors"
+            grep -B1 -A3 "ArkTS:ERROR" build_output.log | head -n 120
+            echo "### hvigor ERROR tail"
+            grep -E "ERROR" build_output.log | grep -v "WARN" | tail -n 40
+          } >> "$GITHUB_STEP_SUMMARY" || true
+          grep "ArkTS:ERROR" build_output.log | head -n 8 | while IFS= read -r line; do
             echo "::error::${line:0:400}"
           done
           exit 1
