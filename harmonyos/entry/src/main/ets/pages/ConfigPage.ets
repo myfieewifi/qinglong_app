@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { ConfigBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
 
 @Component
 export struct ConfigPage {
@@ -27,38 +27,44 @@ export struct ConfigPage {
 
   build() {
     Column() {
-      Row() {
-        Text('配置文件').fontSize(18).fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.text_primary')).layoutWeight(1);
-        Button('刷新').height(40).onClick(() => { this.load(); });
-      }.padding(12);
+      PageBar({ title: '配置文件' });
 
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
         EmptyView({ message: '暂无配置文件' });
       } else {
-        List({ space: 10 }) {
-          ForEach(this.list, (c: ConfigBean, index: number) => {
+        List() {
+          ForEach(this.list, (c: ConfigBean) => {
             ListItem() {
               Row() {
-                Text('📄').fontSize(20).margin({ right: 10 });
-                Column({ space: 4 }) {
+                Column({ space: 3 }) {
                   Text(c.title).fontSize(16).fontColor($r('app.color.text_primary')).maxLines(1);
-                  Text(c.value).fontSize(12).fontColor($r('app.color.text_secondary')).maxLines(1);
+                  Text(c.value).fontSize(13).fontColor($r('app.color.text_desc')).maxLines(1);
                 }.alignItems(HorizontalAlign.Start).layoutWeight(1);
-                Text('›').fontSize(20).fontColor($r('app.color.text_secondary'));
+
+                Text('›').fontSize(22).fontColor($r('app.color.text_desc')).margin({ left: 8 });
               }
-              .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12)
+              .width('100%')
+              .padding({ left: 15, right: 15, top: 13, bottom: 13 })
+              .backgroundColor(Color.White)
               .onClick(() => {
-                router.pushUrl({ url: 'pages/ConfigEditorPage', params: { name: c.title } });
+                router.pushUrl({ url: 'pages/ConfigEditorPage', params: { name: c.title } }).catch(() => {});
               });
             }
           }, (c: ConfigBean) => `${c.title}-${c.value}`);
         }
-        .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
+        .width('100%').layoutWeight(1)
+        .scrollBar(BarState.Off)
+        .divider({
+          strokeWidth: 0.5,
+          color: $r('app.color.divider_color'),
+          startMargin: 15,
+          endMargin: 0
+        });
       }
     }
-    .width('100%').height('100%');
+    .width('100%').height('100%')
+    .backgroundColor($r('app.color.bg_page'));
   }
 }

@@ -1,7 +1,7 @@
 import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -35,12 +35,13 @@ struct TaskLogPage {
   }
 
   build() {
-    Column({ space: 12 }) {
-      Row() {
-        Text(this.taskName.length > 0 ? this.taskName : '任务日志')
-          .fontSize(18).fontWeight(FontWeight.Bold).layoutWeight(1);
-        Button('刷新').height(36).onClick(() => { this.loadLog(); });
-      }.margin({ top: 16 });
+    Column() {
+      PageBar({
+        title: this.taskName.length > 0 ? this.taskName : '任务日志',
+        showBack: true,
+        actionTitle: '刷新',
+        onAction: () => { this.loadLog(); }
+      });
 
       if (this.loading) {
         LoadingView();
@@ -52,10 +53,11 @@ struct TaskLogPage {
             .fontSize(13).fontFamily('monospace')
             .fontColor($r('app.color.text_primary')).width('100%');
         }
-        .layoutWeight(1).backgroundColor(Color.White).borderRadius(12).padding(12);
+        .layoutWeight(1).backgroundColor(Color.White).padding(12)
+        .margin({ top: 8 });
       }
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

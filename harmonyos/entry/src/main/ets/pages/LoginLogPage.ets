@@ -1,7 +1,7 @@
 import { Api } from '../common/api/Api';
 import { LoginLogBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
 import { formatTime } from '../common/utils/DateFmt';
 
 @Entry
@@ -28,17 +28,14 @@ struct LoginLogPage {
 
   build() {
     Column() {
-      Row() {
-        Text('登录日志').fontSize(18).fontWeight(FontWeight.Bold).layoutWeight(1);
-        Button('刷新').height(36).onClick(() => { this.load(); });
-      }.padding(12);
+      PageBar({ title: '登录日志', showBack: true });
 
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
         EmptyView({ message: '暂无登录日志' });
       } else {
-        List({ space: 10 }) {
+        List() {
           ForEach(this.list, (log: LoginLogBean, i: number) => {
             ListItem() {
               Column({ space: 6 }) {
@@ -48,18 +45,27 @@ struct LoginLogPage {
                   Text(log.status === 0 ? '成功' : '失败')
                     .fontSize(12).fontColor(log.status === 0 ? $r('app.color.success_color') : $r('app.color.danger_color'));
                 }.width('100%');
-                Text(log.address || log.platform || '-').fontSize(12)
-                  .fontColor($r('app.color.text_secondary'));
+                Text(log.address || log.platform || '-').fontSize(13)
+                  .fontColor($r('app.color.text_desc'));
                 Text(formatTime(log.timestamp)).fontSize(12)
-                  .fontColor($r('app.color.text_secondary'));
+                  .fontColor($r('app.color.text_desc'));
               }
-              .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12);
+              .width('100%').padding({ left: 15, right: 15, top: 10, bottom: 10 })
+              .backgroundColor(Color.White);
             }
           }, (log: LoginLogBean, i: number) => `${i}-${log.ip}-${log.timestamp}`);
         }
-        .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
+        .width('100%').layoutWeight(1)
+        .scrollBar(BarState.Off)
+        .divider({
+          strokeWidth: 0.5,
+          color: $r('app.color.divider_color'),
+          startMargin: 15,
+          endMargin: 0
+        });
       }
     }
-    .width('100%').height('100%');
+    .width('100%').height('100%')
+    .backgroundColor($r('app.color.bg_page'));
   }
 }

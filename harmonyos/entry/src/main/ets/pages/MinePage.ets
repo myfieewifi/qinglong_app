@@ -1,7 +1,6 @@
 import router from '@ohos.router';
 import { AppStore } from '../common/store/AppStore';
 import { toast } from '../common/components/Toast';
-import { Cell } from '../common/components/Common';
 
 interface MenuEntry {
   title: string;
@@ -38,34 +37,47 @@ export struct MinePage {
 
   build() {
     Column() {
-      Column({ space: 8 }) {
-        Text(this.username || '未登录').fontSize(20).fontWeight(FontWeight.Bold)
+      // 顶部账户区：绿色渐变（对齐 Flutter 我的页头部）
+      Column({ space: 6 }) {
+        Text(this.username || '未登录').fontSize(20).fontWeight(FontWeight.Medium)
           .fontColor(Color.White);
-        Text(this.host).fontSize(13).fontColor('#D6E2FF').maxLines(1);
+        Text(this.host).fontSize(13).fontColor('#DFF5E6').maxLines(1);
       }
-      .width('100%').padding(20).alignItems(HorizontalAlign.Start)
-      .backgroundColor($r('app.color.brand_color'))
-      .borderRadius({ bottomLeft: 16, bottomRight: 16 });
+      .width('100%').padding({ left: 15, right: 15, top: 18, bottom: 18 })
+      .alignItems(HorizontalAlign.Start)
+      .linearGradient({
+        angle: 90,
+        colors: [[$r('app.color.gradient_start'), 0], [$r('app.color.gradient_end'), 1]]
+      });
 
-      List({ space: 1 }) {
+      List() {
         ForEach(this.menus, (m: MenuEntry) => {
           ListItem() {
             Row() {
               Text(m.icon).fontSize(18).margin({ right: 12 });
               Text(m.title).fontSize(16).fontColor($r('app.color.text_primary')).layoutWeight(1);
-              Text('›').fontSize(20).fontColor($r('app.color.text_secondary'));
+              Text('›').fontSize(20).fontColor($r('app.color.text_desc'));
             }
             .width('100%').padding({ left: 16, right: 16, top: 15, bottom: 15 })
             .backgroundColor(Color.White)
-            .onClick(() => { router.pushUrl({ url: m.route }); });
+            .onClick(() => { router.pushUrl({ url: m.route }).catch(() => {}); });
           }
         });
       }
-      .layoutWeight(1).margin({ top: 12 });
+      .layoutWeight(1)
+      .scrollBar(BarState.Off)
+      .divider({
+        strokeWidth: 0.5,
+        color: $r('app.color.divider_color'),
+        startMargin: 46,
+        endMargin: 0
+      });
 
       Button('退出登录')
-        .width('92%').height(46).margin(16)
+        .width('100%').height(46).margin({ left: 15, right: 15, bottom: 16 })
+        .fontSize(15)
         .fontColor($r('app.color.danger_color')).backgroundColor(Color.White)
+        .borderRadius(20)
         .onClick(() => { this.logout(); });
     }
     .width('100%').height('100%').backgroundColor($r('app.color.bg_page'));

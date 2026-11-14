@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { EnvBean, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { PrimaryButton } from '../common/components/Common';
+import { PrimaryButton, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -53,25 +53,39 @@ struct EnvEditPage {
   }
 
   build() {
-    Column({ space: 16 }) {
-      Text(this.sId.length > 0 ? '编辑变量' : '新增变量')
-        .fontSize(20).fontWeight(FontWeight.Bold).margin({ top: 16 });
+    Column() {
+      PageBar({ title: this.sId.length > 0 ? '编辑变量' : '新增变量', showBack: true });
 
-      TextInput({ placeholder: '变量名', text: this.name })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.name = v; });
+      Column({ space: 16 }) {
+        TextInput({ placeholder: '变量名', text: this.name })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.name = v; });
 
-      TextArea({ placeholder: '变量值', text: this.value })
-        .height(140).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.value = v; });
+        TextArea({ placeholder: '变量值', text: this.value })
+          .height(140).borderRadius(4).padding({ left: 10, right: 10, top: 8 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.value = v; });
 
-      TextInput({ placeholder: '备注（可选）', text: this.remarks })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.remarks = v; });
+        TextInput({ placeholder: '备注（可选）', text: this.remarks })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.remarks = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+        PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+      }
+      .width('100%').layoutWeight(1)
+      .padding({ left: 20, right: 20, top: 20, bottom: 20 });
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

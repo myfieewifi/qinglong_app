@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { PrimaryButton } from '../common/components/Common';
+import { PrimaryButton, PageBar } from '../common/components/Common';
 
 /** 订阅新增 / 编辑表单，字段对齐原 Flutter add_subscribe_page.dart。 */
 @Entry
@@ -144,11 +144,11 @@ struct SubscribeEditPage {
   }
 
   build() {
-    Column({ space: 14 }) {
-      Text(this.isEdit ? '编辑订阅' : '新增订阅')
-        .fontSize(20).fontWeight(FontWeight.Bold).margin({ top: 16 });
+    Column() {
+      PageBar({ title: this.isEdit ? '编辑订阅' : '新增订阅', showBack: true });
 
-      Scroll() {
+      Column({ space: 14 }) {
+        Scroll() {
         Column({ space: 12 }) {
           TextInput({ placeholder: '名称（可选）', text: this.name })
             .height(48).borderRadius(12).backgroundColor(Color.White)
@@ -224,11 +224,12 @@ struct SubscribeEditPage {
               .onChange((v: string) => { this.subAfter = v; });
           }
         }.width('100%');
-      }.layoutWeight(1).scrollBar(BarState.Auto);
+      }.layoutWeight(1).scrollBar(BarState.Auto).padding({ left: 20, right: 20, top: 16 });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } })
+        .margin({ left: 20, right: 20, bottom: 20 });
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

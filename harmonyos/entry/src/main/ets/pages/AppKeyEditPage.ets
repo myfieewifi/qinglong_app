@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { RawMap, getString, getNumber, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { PrimaryButton } from '../common/components/Common';
+import { PrimaryButton, PageBar } from '../common/components/Common';
 
 interface ScopeOption {
   key: string;
@@ -81,31 +81,38 @@ struct AppKeyEditPage {
   }
 
   build() {
-    Column({ space: 14 }) {
-      Text(this.isEdit ? '编辑 AppKey' : '新增 AppKey')
-        .fontSize(20).fontWeight(FontWeight.Bold).margin({ top: 16 });
+    Column() {
+      PageBar({ title: this.isEdit ? '编辑 AppKey' : '新增 AppKey', showBack: true });
 
-      Scroll() {
-        Column({ space: 12 }) {
-          TextInput({ placeholder: '名称', text: this.name })
-            .height(48).borderRadius(12).backgroundColor(Color.White)
-            .onChange((v: string) => { this.name = v; });
+      Column({ space: 14 }) {
+        Scroll() {
+          Column({ space: 12 }) {
+            TextInput({ placeholder: '名称', text: this.name })
+              .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+              .backgroundColor(Color.White)
+              .border({ width: 1, color: '#E4E4E4' })
+              .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+              .fontSize(14).fontColor($r('app.color.text_primary'))
+              .onChange((v: string) => { this.name = v; });
 
-          Text('权限范围').fontSize(14).fontColor($r('app.color.text_secondary'));
-          Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
-            ForEach(SCOPE_OPTIONS, (opt: ScopeOption) => {
-              Button(opt.label).height(32).fontSize(13).margin(5)
-                .backgroundColor(this.selected.indexOf(opt.key) >= 0 ? $r('app.color.brand_color') : Color.White)
-                .fontColor(this.selected.indexOf(opt.key) >= 0 ? Color.White : $r('app.color.text_primary'))
-                .onClick(() => { this.toggle(opt.key); });
-            });
-          }
-        }.width('100%');
-      }.layoutWeight(1).scrollBar(BarState.Auto);
+            Text('权限范围').fontSize(14).fontColor($r('app.color.text_secondary'));
+            Flex({ wrap: FlexWrap.Wrap, justifyContent: FlexAlign.Start }) {
+              ForEach(SCOPE_OPTIONS, (opt: ScopeOption) => {
+                Button(opt.label).height(32).fontSize(13).margin(5)
+                  .backgroundColor(this.selected.indexOf(opt.key) >= 0 ? $r('app.color.brand_color') : Color.White)
+                  .fontColor(this.selected.indexOf(opt.key) >= 0 ? Color.White : $r('app.color.text_primary'))
+                  .onClick(() => { this.toggle(opt.key); });
+              });
+            }
+          }.width('100%');
+        }.layoutWeight(1).scrollBar(BarState.Auto).padding({ left: 20, right: 20, top: 16 });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } });
+        PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.submit(); } })
+          .margin({ left: 20, right: 20, bottom: 20 });
+      }
+      .width('100%').layoutWeight(1);
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

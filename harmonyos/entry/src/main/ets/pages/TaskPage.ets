@@ -2,8 +2,12 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { TaskBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar, RunningBadge, StatusBadge } from '../common/components/Common';
 import { formatTime } from '../common/utils/DateFmt';
+
+interface TabEntry {
+  title: string;
+}
 
 @Component
 export struct TaskPage {
@@ -11,6 +15,13 @@ export struct TaskPage {
   @State loading: boolean = false;
   @State refreshing: boolean = false;
   @State search: string = '';
+  @State tabIndex: number = 0;
+  private tabs: TabEntry[] = [
+    { title: '全部' },
+    { title: '运行中' },
+    { title: '从未运行' },
+    { title: '已禁用' }
+  ];
   private api: Api = new Api();
 
   aboutToAppear(): void {
@@ -29,12 +40,30 @@ export struct TaskPage {
     }
   }
 
+  private inTab(t: TaskBean): boolean {
+    if (this.tabIndex === 1) {
+      return t.running;
+    }
+    if (this.tabIndex === 2) {
+      return !t.running && t.lastExecutionTime === 0;
+    }
+    if (this.tabIndex === 3) {
+      return t.isDisabled === 1;
+    }
+    return true;
+  }
+
   private filtered(): TaskBean[] {
     const kw = this.search.trim();
-    if (kw.length === 0) {
-      return this.list;
-    }
-    return this.list.filter((t: TaskBean) => t.name.includes(kw));
+    return this.list.filter((t: TaskBean) => {
+      if (!this.inTab(t)) {
+        return false;
+      }
+      if (kw.length === 0) {
+        return true;
+      }
+      return t.name.includes(kw) || t.command.includes(kw) || t.schedule.includes(kw);
+    });
   }
 
   private ident(t: TaskBean): string {
@@ -59,14 +88,89 @@ export struct TaskPage {
     this.load(false);
   }
 
+  @Builder
+  TaskCell(t: TaskBean) {
+    Column({ space: 5 }) {
+      Row() {
+        Text(t.name).fontSize(17).fontColor($r('app.color.text_primary'))
+          .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis })
+          .constraintSize({ maxWidth: '60%' });
+        if (t.running) {
+          RunningBadge().margin({ left: 7 });
+        }
+        if (t.isDisabled === 1) {
+          Column() {
+            StatusBadge({ title: '已禁用', badgeColor: '#FB5858', lightBg: '#1AFB5858' });
+          }.margin({ left: 7 });
+        }
+        Blank().layoutWeight(1);
+        Text(t.lastExecutionTime === 0 ? '-' : formatTime(t.lastExecutionTime))
+          .fontSize(12).fontColor($r('app.color.text_desc')).maxLines(1);
+      }
+      .width('100%');
+
+      Text(t.schedule).fontSize(14).fontColor($r('app.color.text_desc'))
+        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%');
+
+      Text(t.command).fontSize(14).fontColor($r('app.color.text_desc'))
+        .maxLines(1).textOverflow({ overflow: TextOverflow.Ellipsis }).width('100%');
+
+      Row({ space: 20 }) {
+        Text(t.running ? '停止' : '运行').fontSize(13).fontColor($r('app.color.brand_color'))
+          .onClick(() => {
+            if (t.running) { this.stop(t); } else { this.run(t); }
+          });
+        Text('日志').fontSize(13).fontColor($r('app.color.text_secondary'))
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/TaskLogPage', params: { id: this.ident(t), name: t.name } }).catch(() => {});
+          });
+        Text('编辑').fontSize(13).fontColor($r('app.color.text_secondary'))
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/TaskEditPage', params: { bean: JSON.stringify(t) } }).catch(() => {});
+          });
+        Text('删除').fontSize(13).fontColor($r('app.color.danger_color'))
+          .onClick(() => { this.remove(t); });
+      }
+      .width('100%').justifyContent(FlexAlign.End)
+      .padding({ top: 2 });
+    }
+    .width('100%')
+    .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+    .backgroundColor(t.isPinned === 1 ? '#F2FBF5' : Color.White);
+  }
+
   build() {
     Column() {
-      Row({ space: 10 }) {
-        TextInput({ placeholder: '搜索任务', text: this.search })
-          .layoutWeight(1).height(40).borderRadius(10).backgroundColor(Color.White)
+      PageBar({ title: '定时任务' });
+
+      // 搜索区：Flutter SearchCell —— 白底圆角输入框浮在浅灰底上
+      Column() {
+        TextInput({ placeholder: '搜索', text: this.search })
+          .height(36).borderRadius(10).backgroundColor(Color.White)
+          .padding({ left: 12, right: 12 })
+          .placeholderColor($r('app.color.text_desc')).placeholderFont({ size: 14 })
+          .fontSize(15).fontColor($r('app.color.text_primary'))
           .onChange((v: string) => { this.search = v; });
-        Button('刷新').height(40).onClick(() => { this.load(false); });
-      }.padding(12);
+      }
+      .width('100%')
+      .backgroundColor('#F1F1F1')
+      .padding({ left: 15, right: 15, top: 10, bottom: 10 });
+
+      // 分段筛选：下划线指示器（对齐 Flutter TabBar）
+      Row() {
+        ForEach(this.tabs, (item: TabEntry) => {
+          Column() {
+            Text(item.title)
+              .fontSize(14)
+              .fontColor(this.tabIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : '#999999');
+          }
+          .layoutWeight(1).height(40).justifyContent(FlexAlign.Center)
+          .border({ width: { bottom: 2 }, color: { bottom: this.tabIndex === this.tabs.indexOf(item) ? $r('app.color.brand_color') : Color.Transparent } })
+          .onClick(() => { this.tabIndex = this.tabs.indexOf(item); });
+        }, (item: TabEntry) => item.title);
+      }
+      .width('100%')
+      .backgroundColor($r('app.color.tabbar_bg'));
 
       if (this.loading) {
         LoadingView();
@@ -74,54 +178,33 @@ export struct TaskPage {
         EmptyView({ message: '暂无定时任务' });
       } else {
         Refresh({ refreshing: $$this.refreshing }) {
-          List({ space: 10 }) {
+          List() {
             ForEach(this.filtered(), (t: TaskBean) => {
               ListItem() {
-                Column({ space: 8 }) {
-                  Row() {
-                    Column({ space: 4 }) {
-                      Text(t.name).fontSize(16).fontWeight(FontWeight.Medium)
-                        .fontColor($r('app.color.text_primary')).maxLines(1);
-                      Text(t.schedule).fontSize(13).fontColor($r('app.color.text_secondary'));
-                    }.alignItems(HorizontalAlign.Start).layoutWeight(1);
-                    Text(t.running ? '运行中' : '已停止')
-                      .fontSize(12).fontColor(t.running ? $r('app.color.success_color') : $r('app.color.text_secondary'));
-                  }.width('100%');
-
-                  Text(`上次执行：${formatTime(t.lastExecutionTime)}`)
-                    .fontSize(12).fontColor($r('app.color.text_secondary'));
-
-                  Row({ space: 8 }) {
-                    Button(t.running ? '停止' : '运行').height(32).fontSize(13)
-                      .onClick(() => {
-                        if (t.running) { this.stop(t); } else { this.run(t); }
-                      });
-                    Button('日志').height(32).fontSize(13)
-                      .onClick(() => {
-                        router.pushUrl({ url: 'pages/TaskLogPage', params: { id: this.ident(t), name: t.name } });
-                      });
-                    Button('编辑').height(32).fontSize(13)
-                      .onClick(() => {
-                        router.pushUrl({ url: 'pages/TaskEditPage', params: { bean: JSON.stringify(t) } });
-                      });
-                    Button('删除').height(32).fontSize(13).fontColor($r('app.color.danger_color'))
-                      .onClick(() => { this.remove(t); });
-                  }
-                }
-                .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12);
+                this.TaskCell(t);
               }
             }, (t: TaskBean) => this.ident(t));
           }
-          .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
+          .width('100%').layoutWeight(1)
+          .scrollBar(BarState.Off)
+          .divider({
+            strokeWidth: 0.5,
+            color: $r('app.color.divider_color'),
+            startMargin: 15,
+            endMargin: 0
+          });
         }
         .onRefreshing(() => { this.load(true); });
       }
 
       Button('+ 新增任务')
-        .width('92%').height(46).margin(12)
+        .width('100%').height(46).margin({ left: 15, right: 15, bottom: 10, top: 8 })
+        .fontSize(15)
         .backgroundColor($r('app.color.brand_color'))
-        .onClick(() => { router.pushUrl({ url: 'pages/TaskEditPage' }); });
+        .borderRadius(20)
+        .onClick(() => { router.pushUrl({ url: 'pages/TaskEditPage' }).catch(() => {}); });
     }
-    .width('100%').height('100%');
+    .width('100%').height('100%')
+    .backgroundColor($r('app.color.bg_page'));
   }
 }

@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import webview from '@ohos.web.webview';
 import { Api } from '../common/api/Api';
 import { toast } from '../common/components/Toast';
-import { LoadingView, PrimaryButton } from '../common/components/Common';
+import { LoadingView, PrimaryButton, PageBar } from '../common/components/Common';
 import { CodeMirrorEditor, WebCodeBridge } from '../common/components/CodeMirrorEditor';
 
 @Entry
@@ -61,24 +61,25 @@ struct ConfigEditorPage {
   }
 
   build() {
-    Column({ space: 12 }) {
-      Row() {
-        Text(this.fileName).fontSize(18).fontWeight(FontWeight.Bold)
-          .fontColor($r('app.color.text_primary')).layoutWeight(1).maxLines(1);
-        Button(this.theme === 'dracula' ? '浅色' : '深色').height(32).fontSize(13)
-          .onClick(() => { this.toggleTheme(); });
-      }.margin({ top: 16 });
+    Column() {
+      PageBar({
+        title: this.fileName,
+        showBack: true,
+        actionTitle: this.theme === 'dracula' ? '浅色' : '深色',
+        onAction: () => { this.toggleTheme(); }
+      });
 
       if (this.loading) {
         LoadingView();
       } else {
         CodeMirrorEditor({ code: this.content, controller: this.webCtrl, theme: this.theme })
-          .layoutWeight(1).borderRadius(12).clip(true);
+          .layoutWeight(1).margin({ top: 8 });
       }
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } })
+        .margin({ left: 15, right: 15, top: 10, bottom: 12 });
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

@@ -3,8 +3,8 @@ import webview from '@ohos.web.webview';
 import { Api } from '../common/api/Api';
 import { TaskBean, JsonMap, asMap } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { PrimaryButton } from '../common/components/Common';
 import { CodeMirrorEditor, WebCodeBridge } from '../common/components/CodeMirrorEditor';
+import { PrimaryButton, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -67,31 +67,46 @@ struct TaskEditPage {
   }
 
   build() {
-    Column({ space: 16 }) {
-      Text(this.sId.length > 0 ? '编辑任务' : '新增任务')
-        .fontSize(20).fontWeight(FontWeight.Bold).margin({ top: 16 });
+    Column() {
+      PageBar({ title: this.sId.length > 0 ? '编辑任务' : '新增任务', showBack: true });
 
-      TextInput({ placeholder: '任务名称', text: this.name })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.name = v; });
+      Column({ space: 16 }) {
+        TextInput({ placeholder: '任务名称', text: this.name })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.name = v; });
 
-      TextInput({ placeholder: 'Cron 定时规则，如 0 9 * * *', text: this.schedule })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.schedule = v; });
+        TextInput({ placeholder: 'Cron 定时规则，如 0 9 * * *', text: this.schedule })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.schedule = v; });
 
-      Column({ space: 6 }) {
-        Text('执行脚本命令').fontSize(14).fontColor($r('app.color.text_secondary'));
-        CodeMirrorEditor({ code: this.command, controller: this.webCtrl, theme: 'dracula' })
-          .height(220).borderRadius(12).clip(true);
-      }.width('100%');
+        Column({ space: 6 }) {
+          Text('执行脚本命令').fontSize(14).fontColor($r('app.color.text_secondary'));
+          CodeMirrorEditor({ code: this.command, controller: this.webCtrl, theme: 'dracula' })
+            .height(220).borderRadius(12).clip(true);
+        }.width('100%');
 
-      TextInput({ placeholder: '备注（可选）', text: this.remarks })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.remarks = v; });
+        TextInput({ placeholder: '备注（可选）', text: this.remarks })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.remarks = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+        PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+      }
+      .width('100%').layoutWeight(1)
+      .padding({ left: 20, right: 20, top: 20, bottom: 20 });
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }

@@ -1,7 +1,7 @@
 import { Api } from '../common/api/Api';
 import { DependencyBean } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -42,23 +42,28 @@ struct DependencyPage {
 
   build() {
     Column() {
+      PageBar({ title: '依赖管理', showBack: true });
+
       Row({ space: 8 }) {
         ForEach(this.tabs, (t: string, i: number) => {
           Text(t)
             .fontSize(13).padding({ left: 12, right: 12, top: 8, bottom: 8 })
-            .borderRadius(8)
+            .borderRadius(16)
             .backgroundColor(this.current === i ? $r('app.color.brand_color') : Color.White)
             .fontColor(this.current === i ? Color.White : $r('app.color.text_secondary'))
             .onClick(() => { this.current = i; this.load(); });
         });
-      }.padding(12);
+      }
+      .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+      .backgroundColor($r('app.color.tabbar_bg'))
+      .width('100%');
 
       if (this.loading) {
         LoadingView();
       } else if (this.list.length === 0) {
         EmptyView({ message: '暂无依赖' });
       } else {
-        List({ space: 10 }) {
+        List() {
           ForEach(this.list, (d: DependencyBean) => {
             ListItem() {
               Column({ space: 6 }) {
@@ -66,23 +71,36 @@ struct DependencyPage {
                   Text(d.name).fontSize(16).fontWeight(FontWeight.Medium).layoutWeight(1)
                     .fontColor($r('app.color.text_primary'));
                   Text(d.status === 1 ? '安装中' : '已安装')
-                    .fontSize(12).fontColor($r('app.color.text_secondary'));
+                    .fontSize(12).fontColor(d.status === 1 ? $r('app.color.brand_color') : $r('app.color.text_desc'));
                 }.width('100%');
                 if (d.remark.length > 0) {
-                  Text(d.remark).fontSize(12).fontColor($r('app.color.text_secondary'));
+                  Text(d.remark).fontSize(12).fontColor($r('app.color.text_desc'));
                 }
-                Row({ space: 8 }) {
-                  Button('重装').height(32).fontSize(13).onClick(() => { this.reinstall(d); });
-                  Button('日志').height(32).fontSize(13).onClick(() => { this.viewLog(d); });
+                Row({ space: 20 }) {
+                  Text('重装').fontSize(13).fontColor($r('app.color.brand_color'))
+                    .onClick(() => { this.reinstall(d); });
+                  Text('日志').fontSize(13).fontColor($r('app.color.text_secondary'))
+                    .onClick(() => { this.viewLog(d); });
                 }
+                .width('100%').justifyContent(FlexAlign.End)
+                .padding({ top: 2 });
               }
-              .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12);
+              .width('100%').padding({ left: 15, right: 15, top: 10, bottom: 10 })
+              .backgroundColor(Color.White);
             }
           }, (d: DependencyBean) => `${d.sId}-${d.id}`);
         }
-        .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
+        .width('100%').layoutWeight(1)
+        .scrollBar(BarState.Off)
+        .divider({
+          strokeWidth: 0.5,
+          color: $r('app.color.divider_color'),
+          startMargin: 15,
+          endMargin: 0
+        });
       }
     }
-    .width('100%').height('100%');
+    .width('100%').height('100%')
+    .backgroundColor($r('app.color.bg_page'));
   }
 }

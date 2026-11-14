@@ -1,7 +1,7 @@
 import { Api } from '../common/api/Api';
 import { ScriptNode } from '../common/model/Models';
 import { toast } from '../common/components/Toast';
-import { LoadingView, EmptyView } from '../common/components/Common';
+import { LoadingView, EmptyView, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -52,17 +52,14 @@ struct ScriptPage {
 
   build() {
     Column() {
-      Row() {
-        Text('脚本管理').fontSize(18).fontWeight(FontWeight.Bold).layoutWeight(1);
-        Button('刷新').height(36).onClick(() => { this.load(); });
-      }.padding(12);
+      PageBar({ title: '脚本管理', showBack: true });
 
       if (this.loading) {
         LoadingView();
       } else if (this.flat.length === 0) {
         EmptyView({ message: '暂无脚本' });
       } else {
-        List({ space: 10 }) {
+        List() {
           ForEach(this.flat, (node: ScriptNode) => {
             ListItem() {
               Row() {
@@ -70,12 +67,20 @@ struct ScriptPage {
                 Text(node.title).fontSize(15).layoutWeight(1)
                   .fontColor($r('app.color.text_primary')).maxLines(1);
               }
-              .width('100%').padding(14).backgroundColor(Color.White).borderRadius(12)
+              .width('100%').padding({ left: 15, right: 15, top: 13, bottom: 13 })
+              .backgroundColor(Color.White)
               .onClick(() => { this.open(node); });
             }
           }, (node: ScriptNode) => `${node.parent}/${node.title}`);
         }
-        .layoutWeight(1).padding({ left: 12, right: 12, bottom: 12 });
+        .width('100%').layoutWeight(1)
+        .scrollBar(BarState.Off)
+        .divider({
+          strokeWidth: 0.5,
+          color: $r('app.color.divider_color'),
+          startMargin: 15,
+          endMargin: 0
+        });
       }
 
       if (this.preview.length > 0) {
@@ -83,9 +88,10 @@ struct ScriptPage {
           Text(this.preview).fontSize(13).fontFamily('monospace').width('100%');
         }
         .height(180).padding(12).backgroundColor(Color.White)
-        .borderRadius(12).margin({ left: 12, right: 12, bottom: 12 });
+        .borderRadius(12).margin({ left: 15, right: 15, bottom: 12 });
       }
     }
-    .width('100%').height('100%');
+    .width('100%').height('100%')
+    .backgroundColor($r('app.color.bg_page'));
   }
 }

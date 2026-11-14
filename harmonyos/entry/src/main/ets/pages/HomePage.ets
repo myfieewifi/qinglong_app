@@ -41,17 +41,17 @@ struct HomePage {
 
       Row() {
         ForEach(this.tabs, (item: TabItem) => {
-          Column({ space: 4 }) {
-            Text(item.icon).fontSize(22)
-              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_secondary'));
-            Text(item.title).fontSize(11)
-              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_secondary'));
+          Column({ space: 3 }) {
+            Text(item.icon).fontSize(21)
+              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_desc'));
+            Text(item.title).fontSize(12)
+              .fontColor(this.currentIndex === item.key ? $r('app.color.brand_color') : $r('app.color.text_desc'));
           }
           .layoutWeight(1).height('100%').justifyContent(FlexAlign.Center)
           .onClick(() => { this.currentIndex = item.key; });
         });
       }
-      .width('100%').height(64).backgroundColor(Color.White)
+      .width('100%').height(58).backgroundColor($r('app.color.nav_bg'))
       .border({ width: { top: 0.5 }, color: { top: $r('app.color.divider_color') } });
     }
     .width('100%').height('100%').backgroundColor($r('app.color.bg_page'));

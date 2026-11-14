@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import { Api } from '../common/api/Api';
 import { AppStore } from '../common/store/AppStore';
 import { toast } from '../common/components/Toast';
-import { PrimaryButton } from '../common/components/Common';
+import { PrimaryButton, PageBar } from '../common/components/Common';
 
 @Entry
 @Component
@@ -38,26 +38,41 @@ struct ChangePasswordPage {
   }
 
   build() {
-    Column({ space: 16 }) {
-      Text('修改密码').fontSize(20).fontWeight(FontWeight.Bold).margin({ top: 16 });
+    Column() {
+      PageBar({ title: '修改密码', showBack: true });
 
-      TextInput({ placeholder: '用户名', text: this.username })
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .enabled(false);
+      Column({ space: 16 }) {
+        TextInput({ placeholder: '用户名', text: this.username })
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor('#F5F5F5')
+          .border({ width: 1, color: '#E4E4E4' })
+          .enabled(false)
+          .fontSize(14).fontColor($r('app.color.text_secondary'));
 
-      TextInput({ placeholder: '新密码', text: this.password })
-        .type(InputType.Password)
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.password = v; });
+        TextInput({ placeholder: '新密码', text: this.password })
+          .type(InputType.Password)
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.password = v; });
 
-      TextInput({ placeholder: '确认新密码', text: this.confirm })
-        .type(InputType.Password)
-        .height(48).borderRadius(12).backgroundColor(Color.White)
-        .onChange((v: string) => { this.confirm = v; });
+        TextInput({ placeholder: '确认新密码', text: this.confirm })
+          .type(InputType.Password)
+          .height(44).borderRadius(4).padding({ left: 10, right: 10 })
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E4E4E4' })
+          .placeholderColor($r('app.color.text_hint')).placeholderFont({ size: 14 })
+          .fontSize(14).fontColor($r('app.color.text_primary'))
+          .onChange((v: string) => { this.confirm = v; });
 
-      PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+        PrimaryButton({ label: this.saving ? '保存中…' : '保存', btnEnabled: !this.saving, onTap: () => { this.save(); } });
+      }
+      .width('100%').layoutWeight(1)
+      .padding({ left: 20, right: 20, top: 20, bottom: 20 });
     }
-    .width('100%').height('100%').padding(20)
+    .width('100%').height('100%')
     .backgroundColor($r('app.color.bg_page'));
   }
 }
