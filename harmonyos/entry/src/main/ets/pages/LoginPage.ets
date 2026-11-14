@@ -110,7 +110,7 @@ struct LoginPage {
 
         Blank().layoutWeight(1);
 
-        LogoMark({ size: 46, markRadius: 10 });
+        LogoMark({ iconSize: 46, markRadius: 10 });
       }
       .width('100%')
       .padding({ left: 20, right: 20, top: 64, bottom: 30 });

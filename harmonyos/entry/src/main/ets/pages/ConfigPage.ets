@@ -39,13 +39,13 @@ export struct ConfigPage {
           ForEach(this.list, (c: ConfigBean) => {
             ListItem() {
               Row() {
-                AppIcon({ name: 'script', size: 21, iconColor: $r('app.color.brand_color') });
+                AppIcon({ name: 'script', iconSize: 21, iconColor: $r('app.color.brand_color') });
                 Column({ space: 3 }) {
                   Text(c.title).fontSize(16).fontColor($r('app.color.text_primary')).maxLines(1);
                   Text(c.value).fontSize(13).fontColor($r('app.color.text_desc')).maxLines(1);
                 }.alignItems(HorizontalAlign.Start).layoutWeight(1).margin({ left: 12 });
 
-                AppIcon({ name: 'chev', size: 16, iconColor: '#C8C8C8' }).margin({ left: 8 });
+                AppIcon({ name: 'chev', iconSize: 16, iconColor: '#C8C8C8' }).margin({ left: 8 });
               }
               .width('100%')
               .padding({ left: 15, right: 15, top: 13, bottom: 13 })

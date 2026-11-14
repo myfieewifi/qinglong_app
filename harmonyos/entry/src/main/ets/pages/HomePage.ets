@@ -45,7 +45,7 @@ struct HomePage {
           Column({ space: 2 }) {
             AppIcon({
               name: item.icon,
-              size: 23,
+              iconSize: 23,
               iconColor: this.currentIndex === item.key ?
                 $r('app.color.brand_color') : '#9A9A9A'
             });

@@ -43,10 +43,10 @@ export struct MinePage {
   @Builder
   MenuRow(m: MenuEntry) {
     Row() {
-      AppIcon({ name: m.icon, size: 21, iconColor: $r('app.color.brand_color') });
+      AppIcon({ name: m.icon, iconSize: 21, iconColor: $r('app.color.brand_color') });
       Text(m.title).fontSize(15).fontColor($r('app.color.text_primary'))
         .margin({ left: 13 }).layoutWeight(1);
-      AppIcon({ name: 'chev', size: 15, iconColor: '#C8C8C8' });
+      AppIcon({ name: 'chev', iconSize: 15, iconColor: '#C8C8C8' });
     }
     .width('100%').height(52)
     .padding({ left: 15, right: 15 })
@@ -84,7 +84,7 @@ export struct MinePage {
             }
             .alignItems(HorizontalAlign.Start).layoutWeight(1);
 
-            LogoMark({ size: 56, markRadius: 12, bg: '#FFFFFF', fg: $r('app.color.brand_color') });
+            LogoMark({ iconSize: 56, markRadius: 12, bg: '#FFFFFF', fg: $r('app.color.brand_color') });
           }
           .width('100%').padding({ left: 18, right: 18, top: 22, bottom: 22 })
           .linearGradient({

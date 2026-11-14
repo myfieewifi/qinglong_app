@@ -66,7 +66,7 @@ struct ScriptPage {
               Row() {
                 AppIcon({
                   name: node.children.length > 0 ? 'config' : 'script',
-                  size: 20,
+                  iconSize: 20,
                   iconColor: $r('app.color.brand_color')
                 });
                 Text(node.title).fontSize(15).layoutWeight(1)

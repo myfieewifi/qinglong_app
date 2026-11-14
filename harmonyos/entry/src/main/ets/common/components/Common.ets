@@ -15,7 +15,7 @@ export struct PageBar {
     Row() {
       Row() {
         if (this.showBack) {
-          AppIcon({ name: 'back', size: 22, iconColor: $r('app.color.brand_color'),
+          AppIcon({ name: 'back', iconSize: 22, iconColor: $r('app.color.brand_color'),
             onTap: () => { router.back(); } });
         }
       }
@@ -32,7 +32,7 @@ export struct PageBar {
           Text(this.actionTitle).fontSize(16).fontColor($r('app.color.brand_color'))
             .onClick(() => { this.onAction(); });
         } else if (this.actionIcon.length > 0) {
-          AppIcon({ name: this.actionIcon, size: 20, iconColor: $r('app.color.brand_color'),
+          AppIcon({ name: this.actionIcon, iconSize: 20, iconColor: $r('app.color.brand_color'),
             onTap: () => { this.onAction(); } });
         }
       }
@@ -98,7 +98,7 @@ export struct SearchCapsule {
 
       if (this.search.length === 0) {
         Row({ space: 5 }) {
-          AppIcon({ name: 'search', size: 14, iconColor: '#B9B9B9' });
+          AppIcon({ name: 'search', iconSize: 14, iconColor: '#B9B9B9' });
           Text(this.hint).fontSize(14).fontColor('#B9B9B9');
         }
         .hitTestBehavior(HitTestMode.Transparent);
@@ -178,7 +178,7 @@ export struct Cell {
       }.alignItems(HorizontalAlign.Start).layoutWeight(1);
 
       if (this.showArrow) {
-        AppIcon({ name: 'chev', size: 16, iconColor: '#C8C8C8' }).margin({ left: 8 });
+        AppIcon({ name: 'chev', iconSize: 16, iconColor: '#C8C8C8' }).margin({ left: 8 });
       }
     }
     .width('100%').padding({ left: 15, right: 15, top: 13, bottom: 13 })

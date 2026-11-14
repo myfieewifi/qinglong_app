@@ -34,10 +34,10 @@ struct AboutPage {
   @Builder
   LinkRow(icon: string, title: string, onTap: () => void) {
     Row() {
-      AppIcon({ name: icon, size: 21, iconColor: $r('app.color.brand_color') });
+      AppIcon({ name: icon, iconSize: 21, iconColor: $r('app.color.brand_color') });
       Text(title).fontSize(16).fontColor($r('app.color.text_primary'))
         .margin({ left: 13 }).layoutWeight(1);
-      AppIcon({ name: 'chev', size: 15, iconColor: '#C8C8C8' });
+      AppIcon({ name: 'chev', iconSize: 15, iconColor: '#C8C8C8' });
     }
     .width('100%').height(54)
     .padding({ left: 15, right: 15 })
@@ -53,7 +53,7 @@ struct AboutPage {
         Column() {
           // 居中 Logo 区
           Column({ space: 10 }) {
-            LogoMark({ size: 84, markRadius: 20 }).margin({ top: 26 });
+            LogoMark({ iconSize: 84, markRadius: 20 }).margin({ top: 26 });
             Text('青龙客户端').fontSize(20).fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.text_primary'));
             Text('基于青龙开源项目打造的第三方客户端')

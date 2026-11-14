@@ -32,7 +32,7 @@ struct SettingPage {
   @Builder
   SwitchRow(icon: string, title: string, isOn: boolean, onChange: (v: boolean) => void) {
     Row() {
-      AppIcon({ name: icon, size: 21, iconColor: $r('app.color.brand_color') });
+      AppIcon({ name: icon, iconSize: 21, iconColor: $r('app.color.brand_color') });
       Text(title).fontSize(16).fontColor($r('app.color.text_primary'))
         .margin({ left: 13 }).layoutWeight(1);
       Toggle({ type: ToggleType.Switch, isOn: isOn })
@@ -47,10 +47,10 @@ struct SettingPage {
   @Builder
   LinkRow(icon: string, title: string, onTap: () => void) {
     Row() {
-      AppIcon({ name: icon, size: 21, iconColor: $r('app.color.brand_color') });
+      AppIcon({ name: icon, iconSize: 21, iconColor: $r('app.color.brand_color') });
       Text(title).fontSize(16).fontColor($r('app.color.text_primary'))
         .margin({ left: 13 }).layoutWeight(1);
-      AppIcon({ name: 'chev', size: 15, iconColor: '#C8C8C8' });
+      AppIcon({ name: 'chev', iconSize: 15, iconColor: '#C8C8C8' });
     }
     .width('100%').height(54)
     .padding({ left: 15, right: 15 })

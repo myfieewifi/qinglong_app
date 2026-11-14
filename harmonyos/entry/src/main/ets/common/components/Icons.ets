@@ -165,7 +165,7 @@ const ICON_PATHS: Record<string, string[]> = {
 /** 青龙 Logo：圆角方块 + 白字（或反色）。 */
 @Component
 export struct LogoMark {
-  @State size: number = 48;
+  @State iconSize: number = 48;
   @State markRadius: number = 11;
   @State bg: ResourceColor = $r('app.color.brand_color');
   @State fg: ResourceColor = Color.White;
@@ -173,12 +173,12 @@ export struct LogoMark {
   build() {
     Column() {
       Text('青龙')
-        .fontSize(this.size * 0.4)
+        .fontSize(this.iconSize * 0.4)
         .fontWeight(FontWeight.Bold)
         .fontColor(this.fg)
         .maxLines(1);
     }
-    .width(this.size).height(this.size)
+    .width(this.iconSize).height(this.iconSize)
     .justifyContent(FlexAlign.Center)
     .backgroundColor(this.bg)
     .borderRadius(this.markRadius);
@@ -189,7 +189,7 @@ export struct LogoMark {
 @Component
 export struct AppIcon {
   @State name: string = 'info';
-  @State size: number = 22;
+  @State iconSize: number = 22;
   @State iconColor: ResourceColor = $r('app.color.brand_color');
   onTap?: () => void;
 
@@ -213,14 +213,14 @@ export struct AppIcon {
           .strokeLineJoin(LineJoinStyle.Round)
           .strokeMiterLimit(4)
           .scale({
-            x: this.size / 24,
-            y: this.size / 24,
+            x: this.iconSize / 24,
+            y: this.iconSize / 24,
             centerX: 12,
             centerY: 12
           });
       }, (d: string) => d);
     }
-    .width(this.size).height(this.size)
+    .width(this.iconSize).height(this.iconSize)
     .onClick(() => { if (this.onTap) { this.onTap(); } });
   }
 }
